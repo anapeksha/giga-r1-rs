@@ -38,3 +38,15 @@ enabled = false
 
 [attach.gdb]
 enabled = true
+
+[rtt_attach.flashing]
+enabled = false
+
+[rtt_attach.reset]
+enabled = false
+
+[rtt_attach.rtt]
+enabled = true
+
+[rtt_attach.gdb]
+enabled = false

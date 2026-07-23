@@ -132,6 +132,8 @@ pub const LED_RED: PinId = p(Port::I, 12);
 pub const LED_GREEN: PinId = p(Port::J, 13);
 pub const LED_BLUE: PinId = p(Port::E, 3);
 pub const USB_HOST_ENABLE: PinId = p(Port::A, 15);
+/// BOOT0 push button. The signal is active high while the button is held.
+pub const BOOT0_BUTTON: PinId = p(Port::C, 13);
 
 const fn p(port: Port, pin: u8) -> PinId {
     PinId::new(port, pin)

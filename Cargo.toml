@@ -2,6 +2,9 @@
 resolver = "2"
 members = [
     "crates/arduino-giga",
+    "examples/m7_boot0_button",
+    "examples/m7_defmt_heartbeat",
+    "examples/m7_exti_button",
     "examples/m7_rgb_blinky",
 ]
 
@@ -22,6 +25,7 @@ cortex-m-rt = "0.7.5"
 critical-section = "1.2.0"
 defmt = "1.0.1"
 defmt-rtt = "1.0.0"
+embassy-executor = { version = "0.10.0", default-features = false }
 embassy-stm32 = { version = "0.6.0", default-features = false, features = [
     "rt",
     "unstable-pac",
