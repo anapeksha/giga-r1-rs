@@ -21,7 +21,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "arduino-giga"
+name = "giga-r1"
 version = "0.1.0"
 dependencies = [
  "cortex-m",
@@ -200,7 +200,7 @@ dependencies = [
 name = "dual-core-m4"
 version = "0.1.0"
 dependencies = [
- "arduino-giga",
+ "giga-r1",
  "cortex-m",
  "cortex-m-rt",
  "defmt 1.1.1",

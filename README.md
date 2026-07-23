@@ -1,6 +1,6 @@
-# arduino-giga
+# giga-r1
 
-`arduino-giga` is a Rust-native, HAL-agnostic `no_std` board support package
+`giga-r1` is a Rust-native, HAL-agnostic `no_std` board support package
 for the Arduino GIGA R1 WiFi and its dual-core STM32H747XI (Cortex-M7 +
 Cortex-M4).
 
@@ -11,7 +11,7 @@ image kept in its own root package and memory map.
 
 ```toml
 [dependencies]
-arduino-giga = "0.1"
+giga-r1 = "0.1"
 ```
 
 Optional hardware and integration features are disabled by default:

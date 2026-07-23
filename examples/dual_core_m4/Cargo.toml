@@ -9,7 +9,7 @@ publish = false
 build = "build.rs"
 
 [dependencies]
-arduino-giga = { path = "../../crates/arduino-giga", features = ["dual-core"] }
+giga-r1 = { path = "../../crates/giga-r1", features = ["dual-core"] }
 cortex-m = { version = "0.7.7", features = ["critical-section-single-core"] }
 cortex-m-rt = "0.7.5"
 defmt = { version = "1.0.1", optional = true }
@@ -26,6 +26,6 @@ default = []
 defmt = [
     "dep:defmt",
     "dep:defmt-rtt",
-    "arduino-giga/defmt",
+    "giga-r1/defmt",
     "embassy-stm32/defmt",
 ]

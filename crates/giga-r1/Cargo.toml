@@ -1,5 +1,5 @@
 [package]
-name = "arduino-giga"
+name = "giga-r1"
 description = "Rust no_std board support package for the dual-core Arduino GIGA R1 WiFi."
 version = "0.1.0"
 edition.workspace = true

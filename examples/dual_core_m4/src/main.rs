@@ -3,7 +3,7 @@
 
 use core::mem::MaybeUninit;
 
-use arduino_giga::bridge::{BridgeMailbox, RESPONSE_XOR};
+use giga_r1::bridge::{BridgeMailbox, RESPONSE_XOR};
 use cortex_m_rt::entry;
 #[cfg(feature = "defmt")]
 use defmt_rtt as _;

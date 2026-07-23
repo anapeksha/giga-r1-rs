@@ -8,7 +8,7 @@ build = "build.rs"
 
 [dependencies]
 aligned = "0.4.3"
-arduino-giga = { path = "../../crates/arduino-giga", features = ["wifi"] }
+giga-r1 = { path = "../../crates/giga-r1", features = ["wifi"] }
 cortex-m.workspace = true
 cortex-m-rt.workspace = true
 cyw43.workspace = true
@@ -30,7 +30,7 @@ default = []
 defmt = [
     "dep:defmt",
     "dep:defmt-rtt",
-    "arduino-giga/defmt",
+    "giga-r1/defmt",
     "cyw43/defmt",
     "embassy-executor/defmt",
     "embassy-stm32/defmt",

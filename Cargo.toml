@@ -2,7 +2,7 @@
 resolver = "2"
 exclude = ["examples/dual_core_m4"]
 members = [
-    "crates/arduino-giga",
+    "crates/giga-r1",
     "examples/m7_adc_read",
     "examples/m7_boot0_button",
     "examples/m7_dac_adc_loopback",
@@ -26,9 +26,9 @@ edition = "2024"
 license = "MIT"
 rust-version = "1.88"
 authors = ["Anapeksha Mukherjee <https://github.com/anapeksha>"]
-repository = "https://github.com/anapeksha/arduino-giga-rs"
-homepage = "https://github.com/anapeksha/arduino-giga-rs"
-documentation = "https://docs.rs/arduino-giga"
+repository = "https://github.com/anapeksha/giga-r1-rs"
+homepage = "https://github.com/anapeksha/giga-r1-rs"
+documentation = "https://docs.rs/giga-r1"
 keywords = ["stm32h747", "embedded", "arduino", "giga", "no-std"]
 categories = ["embedded", "hardware-support", "no-std"]
 

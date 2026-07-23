@@ -7,7 +7,7 @@ publish = false
 build = "build.rs"
 
 [dependencies]
-arduino-giga = { path = "../../crates/arduino-giga", features = ["usb"] }
+giga-r1 = { path = "../../crates/giga-r1", features = ["usb"] }
 cortex-m.workspace = true
 cortex-m-rt.workspace = true
 defmt = { workspace = true, optional = true }
@@ -23,7 +23,7 @@ default = []
 defmt = [
     "dep:defmt",
     "dep:defmt-rtt",
-    "arduino-giga/defmt",
+    "giga-r1/defmt",
     "embassy-executor/defmt",
     "embassy-stm32/defmt",
     "embassy-usb/defmt",
