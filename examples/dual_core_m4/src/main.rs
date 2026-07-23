@@ -1,18 +1,11 @@
 #![no_std]
 #![no_main]
 
-use core::mem::MaybeUninit;
-
-use giga_r1::bridge::{BridgeMailbox, RESPONSE_XOR};
 use cortex_m_rt::entry;
 #[cfg(feature = "defmt")]
 use defmt_rtt as _;
-use embassy_stm32::SharedData;
+use giga_r1::bridge::{BridgeMailbox, RESPONSE_XOR};
 use panic_halt as _;
-
-#[allow(unsafe_code)]
-#[unsafe(link_section = ".shared_data")]
-static SHARED_DATA: MaybeUninit<SharedData> = MaybeUninit::uninit();
 
 #[allow(unsafe_code)]
 #[used]
@@ -25,9 +18,9 @@ fn main() -> ! {
         cortex_m::asm::wfe();
     }
 
-    // Make M4 startup visible even if secondary HAL initialization stalls.
+    // The bridge is deliberately HAL- and runtime-independent. The M7 owns
+    // clocks and core release; the M4 only needs its core and shared mailbox.
     BRIDGE.increment_m4_heartbeat();
-    let _peripherals = embassy_stm32::init_secondary(&SHARED_DATA);
     let mut previous_sequence = 0_u32;
 
     loop {

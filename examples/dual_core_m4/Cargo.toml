@@ -1,25 +1,18 @@
-[workspace]
-
 [package]
 name = "dual-core-m4"
 version = "0.1.0"
-edition = "2024"
-license = "MIT"
+edition.workspace = true
+license.workspace = true
 publish = false
 build = "build.rs"
 
 [dependencies]
 giga-r1 = { path = "../../crates/giga-r1", features = ["dual-core"] }
-cortex-m = { version = "0.7.7", features = ["critical-section-single-core"] }
-cortex-m-rt = "0.7.5"
-defmt = { version = "1.0.1", optional = true }
-defmt-rtt = { version = "1.0.0", optional = true }
-embassy-stm32 = { version = "0.6.0", default-features = false, features = [
-    "rt",
-    "stm32h747xi-cm4",
-    "unstable-pac",
-] }
-panic-halt = "1.0.0"
+cortex-m.workspace = true
+cortex-m-rt.workspace = true
+defmt = { workspace = true, optional = true }
+defmt-rtt = { workspace = true, optional = true }
+panic-halt.workspace = true
 
 [features]
 default = []
@@ -27,5 +20,7 @@ defmt = [
     "dep:defmt",
     "dep:defmt-rtt",
     "giga-r1/defmt",
-    "embassy-stm32/defmt",
 ]
+
+[lints]
+workspace = true

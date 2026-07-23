@@ -307,6 +307,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "dual-core-m4"
+version = "0.1.0"
+dependencies = [
+ "cortex-m",
+ "cortex-m-rt",
+ "defmt 1.1.1",
+ "defmt-rtt",
+ "giga-r1",
+ "panic-halt",
+]
+
+[[package]]
 name = "embassy-embedded-hal"
 version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"

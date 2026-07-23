@@ -1,8 +1,8 @@
 [workspace]
 resolver = "2"
-exclude = ["examples/dual_core_m4"]
 members = [
     "crates/giga-r1",
+    "examples/dual_core_m4",
     "examples/m7_adc_read",
     "examples/m7_boot0_button",
     "examples/m7_dac_adc_loopback",
