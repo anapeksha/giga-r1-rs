@@ -135,6 +135,15 @@ pub const USB_HOST_ENABLE: PinId = p(Port::A, 15);
 /// BOOT0 push button. The signal is active high while the button is held.
 pub const BOOT0_BUTTON: PinId = p(Port::C, 13);
 
+pub const SERIAL1_RX: PinId = p(Port::B, 7);
+pub const SERIAL1_TX: PinId = p(Port::A, 9);
+pub const SERIAL2_TX: PinId = p(Port::D, 5);
+pub const SERIAL2_RX: PinId = p(Port::D, 6);
+pub const SERIAL3_TX: PinId = p(Port::H, 13);
+pub const SERIAL3_RX: PinId = p(Port::I, 9);
+pub const SERIAL4_TX: PinId = p(Port::G, 14);
+pub const SERIAL4_RX: PinId = p(Port::C, 7);
+
 const fn p(port: Port, pin: u8) -> PinId {
     PinId::new(port, pin)
 }

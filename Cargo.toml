@@ -5,7 +5,9 @@ members = [
     "examples/m7_boot0_button",
     "examples/m7_defmt_heartbeat",
     "examples/m7_exti_button",
+    "examples/m7_gpio_loopback",
     "examples/m7_rgb_blinky",
+    "examples/m7_uart_loopback",
 ]
 
 [workspace.package]
@@ -31,6 +33,8 @@ embassy-stm32 = { version = "0.6.0", default-features = false, features = [
     "unstable-pac",
 ] }
 embedded-hal = "1.0.0"
+embedded-hal-nb = "1.0.0"
+nb = "1.1.0"
 panic-halt = "1.0.0"
 
 [workspace.lints.rust]
