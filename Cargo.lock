@@ -785,6 +785,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "m7-qspi-jedec"
+version = "0.1.0"
+dependencies = [
+ "arduino-giga",
+ "cortex-m",
+ "cortex-m-rt",
+ "defmt 1.1.1",
+ "defmt-rtt",
+ "embassy-stm32",
+ "panic-halt",
+]
+
+[[package]]
 name = "m7-rgb-blinky"
 version = "0.1.0"
 dependencies = [

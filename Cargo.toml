@@ -12,6 +12,7 @@ members = [
     "examples/m7_fdcan_loopback",
     "examples/m7_gpio_loopback",
     "examples/m7_pwm_loopback",
+    "examples/m7_qspi_jedec",
     "examples/m7_rgb_blinky",
     "examples/m7_spi_loopback",
     "examples/m7_uart_loopback",
