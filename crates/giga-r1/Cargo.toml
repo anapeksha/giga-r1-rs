@@ -3,7 +3,7 @@ name = "giga-r1"
 description = "Rust no_std board support package for the dual-core Arduino GIGA R1 WiFi."
 version = "0.1.0"
 edition.workspace = true
-license.workspace = true
+license-file = "../../LICENSE"
 rust-version.workspace = true
 authors.workspace = true
 repository.workspace = true
@@ -14,7 +14,6 @@ keywords.workspace = true
 categories.workspace = true
 
 [dependencies]
-giga-r1-wifi-firmware = { version = "0.1.0", path = "../../firmware", optional = true }
 cortex-m = { workspace = true, optional = true }
 cyw43 = { workspace = true, optional = true }
 defmt = { workspace = true, optional = true }
@@ -36,7 +35,6 @@ qspi = []
 sdcard = []
 usb = []
 wifi = [
-    "dep:giga-r1-wifi-firmware",
     "dep:cyw43",
     "dep:embedded-hal-async",
 ]

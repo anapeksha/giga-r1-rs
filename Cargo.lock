@@ -770,14 +770,6 @@ dependencies = [
  "defmt 1.1.1",
  "embedded-hal 1.0.0",
  "embedded-hal-async",
- "giga-r1-wifi-firmware",
-]
-
-[[package]]
-name = "giga-r1-wifi-firmware"
-version = "0.1.0"
-dependencies = [
- "aligned",
 ]
 
 [[package]]

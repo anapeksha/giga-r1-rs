@@ -7,9 +7,55 @@
 //! network device, control channel, low-level runner, and power pin.
 
 use crate::pins::{PinId, Port};
+use core::future::Future;
 use embedded_hal::{delay::DelayNs, digital::OutputPin};
 
 pub use cyw43::{Control, NetDriver, Runner, SdioBus, SdioBusCyw43, State};
+
+/// Arduino's CYW4343W firmware image, aligned for SDIO transfers.
+static FIRMWARE: &cyw43::Aligned<cyw43::A4, [u8]> = cyw43::aligned_bytes!("firmware/4343WA1.bin");
+
+/// Country Locale Matrix matching [`FIRMWARE`].
+static CLM: &[u8] = include_bytes!("firmware/4343WA1.clm_blob");
+
+/// Arduino's GIGA NVRAM configuration for the onboard Murata Type 1DX.
+static NVRAM: cyw43::Aligned<cyw43::A4, [u8; 562]> = cyw43::Aligned(
+    *b"manfid=0x2d0\0\
+prodid=0x0726\0\
+vendid=0x14e4\0\
+devid=0x43e2\0\
+boardtype=0x0726\0\
+boardrev=0x1202\0\
+boardnum=22\0\
+macaddr=02:00:00:00:47:01\0\
+sromrev=11\0\
+boardflags=0x00404201\0\
+boardflags3=0x04000000\0\
+xtalfreq=37400\0\
+nocrc=1\0\
+ag0=0\0\
+aa2g=1\0\
+ccode=ALL\0\
+extpagain2g=0\0\
+pa2ga0=-145,6667,-751\0\
+AvVmid_c0=0x0,0xc8\0\
+cckpwroffset0=2\0\
+maxp2ga0=74\0\
+cckbw202gpo=0\0\
+legofdmbw202gpo=0x88888888\0\
+mcsbw202gpo=0xaaaaaaaa\0\
+propbw202gpo=0xdd\0\
+ofdmdigfilttype=18\0\
+ofdmdigfilttypebe=18\0\
+papdmode=1\0\
+papdvalidtest=1\0\
+pacalidx2g=48\0\
+papdepsoffset=-22\0\
+papdendidx=58\0\
+il0macaddr=02:00:00:00:47:01\0\
+wl0id=0x431b\0\
+muxenab=0x10\0\0\0",
+);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
@@ -49,6 +95,16 @@ pub const SDIO: WifiSdioPins = WifiSdioPins {
 pub struct PowerError<E> {
     /// Error returned by the output pin.
     pub source: E,
+}
+
+/// Error returned while powering the radio or constructing its SDIO transport.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
+pub enum StartError<POWER, TRANSPORT> {
+    /// The Wi-Fi power-control pin rejected an operation.
+    Power(POWER),
+    /// The caller-provided SDIO transport factory failed.
+    Transport(TRANSPORT),
 }
 
 /// Board-owned Wi-Fi power controller.
@@ -95,32 +151,30 @@ where
     /// The delay is based only on [`embedded_hal::delay::DelayNs`]. The
     /// returned future can be driven by any executor or by a blocking future
     /// runner selected by the application.
-    pub async fn start<'a, SDIO, DELAY>(
+    pub async fn start_with<'a, SDIO, DELAY, FACTORY, TRANSPORT>(
         mut self,
         state: &'a mut State,
-        sdio: SDIO,
         delay: &mut DELAY,
-    ) -> Result<WifiParts<'a, SDIO, POWER>, PowerError<E>>
+        make_sdio: FACTORY,
+    ) -> Result<WifiParts<'a, SDIO, POWER>, StartError<PowerError<E>, TRANSPORT>>
     where
         SDIO: SdioBusCyw43<64>,
         DELAY: DelayNs,
+        FACTORY: FnOnce() -> Result<SDIO, TRANSPORT>,
     {
         self.power
             .set_low()
-            .map_err(|source| PowerError { source })?;
+            .map_err(|source| StartError::Power(PowerError { source }))?;
         delay.delay_ms(250);
         self.power
             .set_high()
-            .map_err(|source| PowerError { source })?;
+            .map_err(|source| StartError::Power(PowerError { source }))?;
         delay.delay_ms(500);
 
-        let (device, control, runner) = cyw43::new_sdio(
-            state,
-            sdio,
-            &giga_r1_wifi_firmware::FIRMWARE,
-            &giga_r1_wifi_firmware::NVRAM,
-        )
-        .await;
+        // SDIO discovery communicates with the radio, so the transport must
+        // only be constructed after the board-specific power sequence.
+        let sdio = make_sdio().map_err(StartError::Transport)?;
+        let (device, control, runner) = cyw43::new_sdio(state, sdio, FIRMWARE, &NVRAM).await;
 
         Ok(WifiParts {
             device,
@@ -131,32 +185,31 @@ where
     }
 
     /// Runs the power sequence with an asynchronous `embedded-hal` delay.
-    pub async fn start_async<'a, SDIO, DELAY>(
+    pub async fn start_async_with<'a, SDIO, DELAY, FACTORY, FUTURE, TRANSPORT>(
         mut self,
         state: &'a mut State,
-        sdio: SDIO,
         delay: &mut DELAY,
-    ) -> Result<WifiParts<'a, SDIO, POWER>, PowerError<E>>
+        make_sdio: FACTORY,
+    ) -> Result<WifiParts<'a, SDIO, POWER>, StartError<PowerError<E>, TRANSPORT>>
     where
         SDIO: SdioBusCyw43<64>,
         DELAY: embedded_hal_async::delay::DelayNs,
+        FACTORY: FnOnce() -> FUTURE,
+        FUTURE: Future<Output = Result<SDIO, TRANSPORT>>,
     {
         self.power
             .set_low()
-            .map_err(|source| PowerError { source })?;
+            .map_err(|source| StartError::Power(PowerError { source }))?;
         delay.delay_ms(250).await;
         self.power
             .set_high()
-            .map_err(|source| PowerError { source })?;
+            .map_err(|source| StartError::Power(PowerError { source }))?;
         delay.delay_ms(500).await;
 
-        let (device, control, runner) = cyw43::new_sdio(
-            state,
-            sdio,
-            &giga_r1_wifi_firmware::FIRMWARE,
-            &giga_r1_wifi_firmware::NVRAM,
-        )
-        .await;
+        // SDIO discovery communicates with the radio, so the transport must
+        // only be constructed after the board-specific power sequence.
+        let sdio = make_sdio().await.map_err(StartError::Transport)?;
+        let (device, control, runner) = cyw43::new_sdio(state, sdio, FIRMWARE, &NVRAM).await;
 
         Ok(WifiParts {
             device,
@@ -189,6 +242,6 @@ where
     ///
     /// The low-level runner must be polled concurrently.
     pub async fn initialize(&mut self) {
-        self.control.init(giga_r1_wifi_firmware::CLM).await;
+        self.control.init(CLM).await;
     }
 }

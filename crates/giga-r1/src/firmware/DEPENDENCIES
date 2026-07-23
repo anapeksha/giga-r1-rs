@@ -1,0 +1,12 @@
+4343WA1.bin
+  Origin: ArduinoCore-mbed GIGA board package, 4343WA1_bin.o
+  SHA-256: e47f0ee335354c830ad3bc7836144167eccc80b544f2046939abd7f721202464
+  Firmware: 7.45.98.95 (r724303 CY), FWID 01-5afc8c1e
+  License: Cypress Permissive Binary License 1.0, reproduced in the repository LICENSE
+  Runtime dependencies: 4343WA1.clm_blob and board-specific NVRAM data
+
+4343WA1.clm_blob
+  Origin: ArduinoCore-mbed GIGA board package, 4343WA1_clm_blob.o
+  SHA-256: 33339b0101b7130e81a1e8be9056ee6ef1756190a7e7aa1838b233319fac436f
+  License: Cypress Permissive Binary License 1.0, reproduced in the repository LICENSE
+  Runtime dependencies: none

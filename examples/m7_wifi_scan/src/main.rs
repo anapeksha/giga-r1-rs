@@ -82,14 +82,14 @@ async fn main(_spawner: embassy_executor::Spawner) {
         p.PC11,
         Default::default(),
     );
-    let sdio = SerialDataInterface::new(&mut sdmmc, Hertz::khz(400))
-        .await
-        .unwrap();
     let power = Output::new(p.PB10, Level::Low, Speed::Low);
     let wifi = Wifi::new(power).unwrap();
     let mut delay = Delay;
+    let sdmmc = &mut sdmmc;
     let mut parts = wifi
-        .start_async(CYW43_STATE.init(State::new()), sdio, &mut delay)
+        .start_async_with(CYW43_STATE.init(State::new()), &mut delay, move || {
+            SerialDataInterface::new(sdmmc, Hertz::khz(400))
+        })
         .await
         .unwrap();
     let runner = parts.take_runner().unwrap();
