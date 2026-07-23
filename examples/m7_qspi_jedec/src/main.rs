@@ -28,19 +28,13 @@ fn main() -> ! {
     let mut green = Output::new(p.PJ13, Level::High, Speed::Low);
     let mut blue = Output::new(p.PE3, Level::High, Speed::Low);
 
+    #[allow(clippy::field_reassign_with_default)]
     let mut config = Config::default();
     config.memory_size = MemorySize::_16MiB;
     config.prescaler = 3;
     config.fifo_threshold = FIFOThresholdLevel::_1Bytes;
     let mut qspi = Qspi::new_blocking_bank1(
-        p.QUADSPI,
-        p.PD11,
-        p.PD12,
-        p.PE2,
-        p.PF6,
-        p.PF10,
-        p.PG6,
-        config,
+        p.QUADSPI, p.PD11, p.PD12, p.PE2, p.PF6, p.PF10, p.PG6, config,
     );
 
     loop {

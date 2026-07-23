@@ -3,7 +3,6 @@
 
 use core::mem::MaybeUninit;
 
-use giga_r1::bridge::{BridgeMailbox, PING_XOR, RESPONSE_XOR, configure_m7_shared_sram};
 use cortex_m_rt::entry;
 #[cfg(feature = "defmt")]
 use defmt_rtt as _;
@@ -11,6 +10,7 @@ use embassy_stm32::{
     SharedData,
     gpio::{Level, Output, Speed},
 };
+use giga_r1::bridge::{BridgeMailbox, PING_XOR, RESPONSE_XOR, configure_m7_shared_sram};
 use panic_halt as _;
 
 #[allow(unsafe_code)]

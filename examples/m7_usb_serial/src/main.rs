@@ -42,6 +42,7 @@ async fn main(_spawner: embassy_executor::Spawner) {
     let mut blue = Output::new(p.PE3, Level::Low, Speed::Low);
 
     let mut ep_out_buffer = [0_u8; 256];
+    #[allow(clippy::field_reassign_with_default)]
     let mut driver_config = usb::Config::default();
     driver_config.vbus_detection = false;
     let driver = Driver::new_fs(

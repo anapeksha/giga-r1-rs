@@ -53,9 +53,7 @@ async fn main(_spawner: embassy_executor::Spawner) {
         let _replaced = can.write(&frame).await;
 
         let classic_passed = match can.read().await {
-            Ok(envelope) => {
-                envelope.frame.id() == frame.id() && envelope.frame.data() == payload
-            }
+            Ok(envelope) => envelope.frame.id() == frame.id() && envelope.frame.data() == payload,
             Err(_) => false,
         };
 

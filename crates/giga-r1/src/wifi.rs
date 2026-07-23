@@ -117,11 +117,11 @@ pub struct Wifi<POWER> {
 
 /// Fully initialized CYW4343W resources.
 ///
-/// The application owns every returned part. It must keep polling
-/// [`runner`](Self::runner) using its chosen executor or blocking future
-/// runner. [`device`](Self::device) can then be handed to the application's
-/// chosen network stack, while [`control`](Self::control) remains available
-/// for scan, join, and power-management operations.
+/// The application owns every returned part. It must take and keep polling the
+/// runner with [`Self::take_runner`] using its chosen executor or blocking
+/// future runner. [`device`](Self::device) can then be handed to the
+/// application's chosen network stack, while [`control`](Self::control)
+/// remains available for scan, join, and power-management operations.
 pub struct WifiParts<'a, SDIO, POWER>
 where
     SDIO: SdioBusCyw43<64>,

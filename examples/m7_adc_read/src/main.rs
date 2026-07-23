@@ -29,8 +29,10 @@ fn main() -> ! {
     let mut red = Output::new(p.PI12, Level::Low, Speed::Low);
     let mut green = Output::new(p.PJ13, Level::High, Speed::Low);
     let mut blue = Output::new(p.PE3, Level::High, Speed::Low);
-    let mut adc_config = AdcConfig::default();
-    adc_config.resolution = Some(Resolution::BITS16);
+    let adc_config = AdcConfig {
+        resolution: Some(Resolution::BITS16),
+        ..Default::default()
+    };
     let mut adc = Adc::new_with_config(p.ADC1, adc_config);
     let mut a0 = p.PC4;
     red.set_high();

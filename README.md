@@ -1,5 +1,10 @@
 # giga-r1
 
+[![crates.io](https://img.shields.io/crates/v/giga-r1.svg)](https://crates.io/crates/giga-r1)
+[![docs.rs](https://docs.rs/giga-r1/badge.svg)](https://docs.rs/giga-r1)
+[![CI](https://github.com/anapeksha/giga-r1-rs/actions/workflows/ci.yml/badge.svg)](https://github.com/anapeksha/giga-r1-rs/actions/workflows/ci.yml)
+[![license](https://img.shields.io/crates/l/giga-r1.svg)](https://github.com/anapeksha/giga-r1-rs/blob/main/LICENSE)
+
 `giga-r1` is a Rust-native, HAL-agnostic `no_std` board support package
 for the Arduino GIGA R1 WiFi and its dual-core STM32H747XI (Cortex-M7 +
 Cortex-M4).
@@ -8,8 +13,8 @@ The public crate is built on `embedded-hal` and `embedded-hal-async` traits and
 does not force an MCU HAL, executor, or application runtime. Board controls own
 their resources, perform board-specific initialization, and expose
 `release`/owned-part handoffs. Workspace examples use
-[`embassy-stm32`](https://crates.io/crates/embassy-stm32), with each firmware
-image kept in its own root package and memory map.
+[`embassy-stm32`](https://crates.io/crates/embassy-stm32) where useful, while
+the M4 bridge example demonstrates a runtime-independent application.
 
 ```toml
 [dependencies]
@@ -59,7 +64,7 @@ application-owned.
 | Shared | — | D3 SRAM at `0x3800_0000`, first 1 KiB |
 
 The M7 is responsible for clock-tree setup and releasing the M4. Both images
-place Embassy's dual-core coordination object at the same D3 SRAM address.
+communicate through the crate's shared mailbox in D3 SRAM.
 
 ## Source references
 
@@ -71,4 +76,5 @@ datasheet, pinout, and the GIGA variant in ArduinoCore-mbed.
 MIT
 
 The bundled CYW4343W firmware uses Cypress's separate
-[Permissive Binary License 1.0](LICENSE), reproduced after the MIT terms.
+[Permissive Binary License 1.0](https://github.com/anapeksha/giga-r1-rs/blob/main/LICENSE),
+reproduced after the MIT terms.

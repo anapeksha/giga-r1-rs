@@ -66,8 +66,8 @@ fn main() -> ! {
         cortex_m::asm::delay(100_000);
         let three_quarters_high = count_high(&input);
 
-        let passed = (32..=96).contains(&quarter_high)
-            && (160..=224).contains(&three_quarters_high);
+        let passed =
+            (32..=96).contains(&quarter_high) && (160..=224).contains(&three_quarters_high);
 
         blue.set_high();
         if passed {

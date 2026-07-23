@@ -32,8 +32,10 @@ fn main() -> ! {
 
     // Arduino A12 is PA4 / DAC1 channel 1; A0 is PC4 / ADC1 channel 4.
     let mut dac = DacChannel::new_blocking(p.DAC1, p.PA4);
-    let mut adc_config = AdcConfig::default();
-    adc_config.resolution = Some(Resolution::BITS16);
+    let adc_config = AdcConfig {
+        resolution: Some(Resolution::BITS16),
+        ..Default::default()
+    };
     let mut adc = Adc::new_with_config(p.ADC1, adc_config);
     let mut a0 = p.PC4;
 

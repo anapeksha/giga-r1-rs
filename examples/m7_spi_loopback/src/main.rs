@@ -24,6 +24,7 @@ fn main() -> ! {
 
     // Arduino SPI header: D13/PH6 SCK, D11/PJ10 MOSI, D12/PJ11 MISO.
     // Connect D11 to D12. D10/PK1 is held low as the conventional chip select.
+    #[allow(clippy::field_reassign_with_default)]
     let mut config = Config::default();
     config.frequency = Hertz(1_000_000);
     config.miso_pull = Pull::Down;
@@ -38,10 +39,8 @@ fn main() -> ! {
     loop {
         let transmitted = [0x55, 0xaa, sequence, !sequence];
         let mut received = [0_u8; 4];
-        let passed = spi
-            .blocking_transfer(&mut received, &transmitted)
-            .is_ok()
-            && received == transmitted;
+        let passed =
+            spi.blocking_transfer(&mut received, &transmitted).is_ok() && received == transmitted;
 
         blue.set_high();
         if passed {

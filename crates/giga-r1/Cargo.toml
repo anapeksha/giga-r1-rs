@@ -41,6 +41,7 @@ wifi = [
 
 [package.metadata.docs.rs]
 default-target = "thumbv7em-none-eabihf"
+targets = []
 all-features = true
 
 [lints]
