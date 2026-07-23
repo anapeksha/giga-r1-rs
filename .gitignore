@@ -1,4 +1,4 @@
 /target
+/examples/dual_core_m4/target
 **/*.rs.bk
 .DS_Store
-

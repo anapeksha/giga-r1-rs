@@ -14,6 +14,7 @@ keywords.workspace = true
 categories.workspace = true
 
 [dependencies]
+cortex-m = { workspace = true, optional = true }
 defmt = { workspace = true, optional = true }
 embedded-hal.workspace = true
 
@@ -24,6 +25,7 @@ audio = []
 camera = []
 can = []
 display = []
+dual-core = ["dep:cortex-m"]
 qspi = []
 sdcard = []
 usb = []

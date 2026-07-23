@@ -1,0 +1,31 @@
+[workspace]
+
+[package]
+name = "dual-core-m4"
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+publish = false
+build = "build.rs"
+
+[dependencies]
+arduino-giga = { path = "../../crates/arduino-giga", features = ["dual-core"] }
+cortex-m = { version = "0.7.7", features = ["critical-section-single-core"] }
+cortex-m-rt = "0.7.5"
+defmt = { version = "1.0.1", optional = true }
+defmt-rtt = { version = "1.0.0", optional = true }
+embassy-stm32 = { version = "0.6.0", default-features = false, features = [
+    "rt",
+    "stm32h747xi-cm4",
+    "unstable-pac",
+] }
+panic-halt = "1.0.0"
+
+[features]
+default = []
+defmt = [
+    "dep:defmt",
+    "dep:defmt-rtt",
+    "arduino-giga/defmt",
+    "embassy-stm32/defmt",
+]

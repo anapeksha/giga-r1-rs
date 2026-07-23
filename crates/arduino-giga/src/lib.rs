@@ -2,6 +2,8 @@
 #![doc = include_str!("../../../README.md")]
 
 mod board;
+#[cfg(feature = "dual-core")]
+pub mod bridge;
 pub mod pins;
 
 #[cfg(feature = "can")]
