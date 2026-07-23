@@ -9,6 +9,7 @@ members = [
     "examples/m7_defmt_heartbeat",
     "examples/m7_dual_core_bridge",
     "examples/m7_exti_button",
+    "examples/m7_fdcan_loopback",
     "examples/m7_gpio_loopback",
     "examples/m7_pwm_loopback",
     "examples/m7_rgb_blinky",
