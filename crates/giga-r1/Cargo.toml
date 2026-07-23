@@ -14,13 +14,19 @@ keywords.workspace = true
 categories.workspace = true
 
 [dependencies]
+giga-r1-wifi-firmware = { version = "0.1.0", path = "../../firmware", optional = true }
 cortex-m = { workspace = true, optional = true }
+cyw43 = { workspace = true, optional = true }
 defmt = { workspace = true, optional = true }
 embedded-hal.workspace = true
+embedded-hal-async = { workspace = true, optional = true }
 
 [features]
 default = []
-defmt = ["dep:defmt"]
+defmt = [
+    "dep:defmt",
+    "cyw43?/defmt",
+]
 audio = []
 camera = []
 can = []
@@ -29,7 +35,11 @@ dual-core = ["dep:cortex-m"]
 qspi = []
 sdcard = []
 usb = []
-wifi = []
+wifi = [
+    "dep:giga-r1-wifi-firmware",
+    "dep:cyw43",
+    "dep:embedded-hal-async",
+]
 
 [package.metadata.docs.rs]
 default-target = "thumbv7em-none-eabihf"

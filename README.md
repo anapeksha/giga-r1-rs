@@ -4,8 +4,10 @@
 for the Arduino GIGA R1 WiFi and its dual-core STM32H747XI (Cortex-M7 +
 Cortex-M4).
 
-The public crate is built on `embedded-hal` traits and does not force an MCU
-HAL or runtime on applications. Workspace examples use
+The public crate is built on `embedded-hal` and `embedded-hal-async` traits and
+does not force an MCU HAL, executor, or application runtime. Board controls own
+their resources, perform board-specific initialization, and expose
+`release`/owned-part handoffs. Workspace examples use
 [`embassy-stm32`](https://crates.io/crates/embassy-stm32), with each firmware
 image kept in its own root package and memory map.
 
@@ -14,7 +16,7 @@ image kept in its own root package and memory map.
 giga-r1 = "0.1"
 ```
 
-Optional hardware and integration features are disabled by default:
+Optional hardware features are disabled by default:
 
 - `defmt`
 - `audio`
@@ -40,6 +42,12 @@ cargo embed -p m7-rgb-blinky --features defmt --release
 
 The onboard RGB LED is active-low. The test displays red, green, and blue in
 sequence.
+
+Wi-Fi initialization owns the GIGA power sequence, CYW4343W firmware, NVRAM,
+and country data. Because the CYW43 runner consumes itself and must be polled
+continuously, the crate returns that runner to the application for execution by
+its chosen runtime; the network device and control channel remain
+application-owned.
 
 ## Dual-core memory map
 

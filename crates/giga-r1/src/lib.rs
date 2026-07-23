@@ -4,6 +4,7 @@
 mod board;
 #[cfg(feature = "dual-core")]
 pub mod bridge;
+pub mod led;
 pub mod pins;
 
 #[cfg(feature = "can")]

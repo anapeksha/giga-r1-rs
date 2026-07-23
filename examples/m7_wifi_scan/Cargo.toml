@@ -7,7 +7,6 @@ publish = false
 build = "build.rs"
 
 [dependencies]
-aligned = "0.4.3"
 giga-r1 = { path = "../../crates/giga-r1", features = ["wifi"] }
 cortex-m.workspace = true
 cortex-m-rt.workspace = true
@@ -19,7 +18,7 @@ embassy-futures.workspace = true
 embassy-stm32 = { workspace = true, features = [
     "stm32h747xi-cm7",
     "cyw43",
-    "time-driver-tim2",
+    "time-driver-tim5",
 ] }
 embassy-time = "0.5.1"
 panic-halt.workspace = true

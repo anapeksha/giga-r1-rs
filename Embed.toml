@@ -30,6 +30,9 @@ connect_under_reset = true
 [recover.probe]
 speed = 1000
 
+[slow.probe]
+speed = 1000
+
 [attach.flashing]
 enabled = false
 

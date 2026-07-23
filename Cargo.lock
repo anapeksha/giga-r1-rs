@@ -33,22 +33,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "giga-r1"
-version = "0.1.0"
-dependencies = [
- "cortex-m",
- "defmt 1.1.1",
- "embedded-hal 1.0.0",
-]
-
-[[package]]
-name = "giga-r1-wifi-firmware"
-version = "0.1.0"
-dependencies = [
- "aligned",
-]
-
-[[package]]
 name = "as-slice"
 version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -778,6 +762,25 @@ dependencies = [
 ]
 
 [[package]]
+name = "giga-r1"
+version = "0.1.0"
+dependencies = [
+ "cortex-m",
+ "cyw43",
+ "defmt 1.1.1",
+ "embedded-hal 1.0.0",
+ "embedded-hal-async",
+ "giga-r1-wifi-firmware",
+]
+
+[[package]]
+name = "giga-r1-wifi-firmware"
+version = "0.1.0"
+dependencies = [
+ "aligned",
+]
+
+[[package]]
 name = "hash32"
 version = "0.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -872,12 +875,12 @@ dependencies = [
 name = "m7-adc-read"
 version = "0.1.0"
 dependencies = [
- "giga-r1",
  "cortex-m",
  "cortex-m-rt",
  "defmt 1.1.1",
  "defmt-rtt",
  "embassy-stm32",
+ "giga-r1",
  "panic-halt",
 ]
 
@@ -885,12 +888,12 @@ dependencies = [
 name = "m7-boot0-button"
 version = "0.1.0"
 dependencies = [
- "giga-r1",
  "cortex-m",
  "cortex-m-rt",
  "defmt 1.1.1",
  "defmt-rtt",
  "embassy-stm32",
+ "giga-r1",
  "panic-halt",
 ]
 
@@ -898,12 +901,12 @@ dependencies = [
 name = "m7-dac-adc-loopback"
 version = "0.1.0"
 dependencies = [
- "giga-r1",
  "cortex-m",
  "cortex-m-rt",
  "defmt 1.1.1",
  "defmt-rtt",
  "embassy-stm32",
+ "giga-r1",
  "panic-halt",
 ]
 
@@ -911,12 +914,12 @@ dependencies = [
 name = "m7-defmt-heartbeat"
 version = "0.1.0"
 dependencies = [
- "giga-r1",
  "cortex-m",
  "cortex-m-rt",
  "defmt 1.1.1",
  "defmt-rtt",
  "embassy-stm32",
+ "giga-r1",
  "panic-halt",
 ]
 
@@ -924,12 +927,12 @@ dependencies = [
 name = "m7-dual-core-bridge"
 version = "0.1.0"
 dependencies = [
- "giga-r1",
  "cortex-m",
  "cortex-m-rt",
  "defmt 1.1.1",
  "defmt-rtt",
  "embassy-stm32",
+ "giga-r1",
  "panic-halt",
 ]
 
@@ -937,13 +940,13 @@ dependencies = [
 name = "m7-exti-button"
 version = "0.1.0"
 dependencies = [
- "giga-r1",
  "cortex-m",
  "cortex-m-rt",
  "defmt 1.1.1",
  "defmt-rtt",
  "embassy-executor",
  "embassy-stm32",
+ "giga-r1",
  "panic-halt",
 ]
 
@@ -951,13 +954,13 @@ dependencies = [
 name = "m7-fdcan-loopback"
 version = "0.1.0"
 dependencies = [
- "giga-r1",
  "cortex-m",
  "cortex-m-rt",
  "defmt 1.1.1",
  "defmt-rtt",
  "embassy-executor",
  "embassy-stm32",
+ "giga-r1",
  "panic-halt",
 ]
 
@@ -965,12 +968,12 @@ dependencies = [
 name = "m7-gpio-loopback"
 version = "0.1.0"
 dependencies = [
- "giga-r1",
  "cortex-m",
  "cortex-m-rt",
  "defmt 1.1.1",
  "defmt-rtt",
  "embassy-stm32",
+ "giga-r1",
  "panic-halt",
 ]
 
@@ -978,12 +981,12 @@ dependencies = [
 name = "m7-pwm-loopback"
 version = "0.1.0"
 dependencies = [
- "giga-r1",
  "cortex-m",
  "cortex-m-rt",
  "defmt 1.1.1",
  "defmt-rtt",
  "embassy-stm32",
+ "giga-r1",
  "panic-halt",
 ]
 
@@ -991,12 +994,12 @@ dependencies = [
 name = "m7-qspi-jedec"
 version = "0.1.0"
 dependencies = [
- "giga-r1",
  "cortex-m",
  "cortex-m-rt",
  "defmt 1.1.1",
  "defmt-rtt",
  "embassy-stm32",
+ "giga-r1",
  "panic-halt",
 ]
 
@@ -1004,12 +1007,12 @@ dependencies = [
 name = "m7-rgb-blinky"
 version = "0.1.0"
 dependencies = [
- "giga-r1",
  "cortex-m",
  "cortex-m-rt",
  "defmt 1.1.1",
  "defmt-rtt",
  "embassy-stm32",
+ "giga-r1",
  "panic-halt",
 ]
 
@@ -1017,12 +1020,12 @@ dependencies = [
 name = "m7-spi-loopback"
 version = "0.1.0"
 dependencies = [
- "giga-r1",
  "cortex-m",
  "cortex-m-rt",
  "defmt 1.1.1",
  "defmt-rtt",
  "embassy-stm32",
+ "giga-r1",
  "panic-halt",
 ]
 
@@ -1030,13 +1033,13 @@ dependencies = [
 name = "m7-uart-loopback"
 version = "0.1.0"
 dependencies = [
- "giga-r1",
  "cortex-m",
  "cortex-m-rt",
  "defmt 1.1.1",
  "defmt-rtt",
  "embassy-stm32",
  "embedded-hal-nb",
+ "giga-r1",
  "nb 1.1.0",
  "panic-halt",
 ]
@@ -1045,7 +1048,6 @@ dependencies = [
 name = "m7-usb-serial"
 version = "0.1.0"
 dependencies = [
- "giga-r1",
  "cortex-m",
  "cortex-m-rt",
  "defmt 1.1.1",
@@ -1054,6 +1056,7 @@ dependencies = [
  "embassy-futures",
  "embassy-stm32",
  "embassy-usb",
+ "giga-r1",
  "panic-halt",
 ]
 
@@ -1061,8 +1064,6 @@ dependencies = [
 name = "m7-wifi-scan"
 version = "0.1.0"
 dependencies = [
- "aligned",
- "giga-r1",
  "cortex-m",
  "cortex-m-rt",
  "cyw43",
@@ -1072,6 +1073,7 @@ dependencies = [
  "embassy-futures",
  "embassy-stm32",
  "embassy-time",
+ "giga-r1",
  "panic-halt",
  "static_cell",
 ]
@@ -1080,13 +1082,13 @@ dependencies = [
 name = "m7-wifi-sdio-probe"
 version = "0.1.0"
 dependencies = [
- "giga-r1",
  "cortex-m",
  "cortex-m-rt",
  "defmt 1.1.1",
  "defmt-rtt",
  "embassy-executor",
  "embassy-stm32",
+ "giga-r1",
  "panic-halt",
 ]
 
