@@ -66,6 +66,21 @@ application-owned.
 The M7 is responsible for clock-tree setup and releasing the M4. Both images
 communicate through the crate's shared mailbox in D3 SRAM.
 
+## Option-byte recovery
+
+[`tools/set-giga-option-bytes.S`](https://github.com/anapeksha/giga-r1-rs/blob/main/tools/set-giga-option-bytes.S)
+is an advanced, one-time recovery helper that restores the Arduino GIGA boot
+policy: the Cortex-M7 boots automatically while the M4 remains held until the
+M7 supplies its boot vector and releases it. The helper runs from AXI SRAM,
+unlocks option-byte programming, writes Arduino's option value, waits for
+programming to finish, and stops at a debugger breakpoint; reset or power-cycle
+the board afterward to load the new options.
+
+This helper is not part of normal Cargo Embed flashing and is unnecessary once
+the option bytes are correct. It replaces the complete option register with a
+hard-coded board value, so use it only to recover a GIGA R1 whose boot options
+were changed.
+
 ## Source references
 
 The board map is derived from Arduino's official GIGA R1 WiFi schematic,
@@ -73,8 +88,4 @@ datasheet, pinout, and the GIGA variant in ArduinoCore-mbed.
 
 ## License
 
-MIT
-
-The bundled CYW4343W firmware uses Cypress's separate
-[Permissive Binary License 1.0](https://github.com/anapeksha/giga-r1-rs/blob/main/LICENSE),
-reproduced after the MIT terms.
+Original source code is licensed under the [MIT License](LICENSE); the bundled CYW4343W firmware is distributed separately under the Cypress Permissive Binary License 1.0, whose terms are reproduced in the same file.
