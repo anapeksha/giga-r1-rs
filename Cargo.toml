@@ -2,10 +2,12 @@
 resolver = "2"
 members = [
     "crates/arduino-giga",
+    "examples/m7_adc_read",
     "examples/m7_boot0_button",
     "examples/m7_defmt_heartbeat",
     "examples/m7_exti_button",
     "examples/m7_gpio_loopback",
+    "examples/m7_pwm_loopback",
     "examples/m7_rgb_blinky",
     "examples/m7_spi_loopback",
     "examples/m7_uart_loopback",
