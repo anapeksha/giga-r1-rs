@@ -1,5 +1,6 @@
 [default.general]
-chip = "STM32H747XI"
+chip = "GIGA_R1_M7"
+chip_descriptions = ["tools/giga-r1-m7.yaml"]
 connect_under_reset = false
 
 [default.probe]
@@ -32,6 +33,34 @@ speed = 1000
 
 [slow.probe]
 speed = 1000
+
+[safe.probe]
+speed = 50
+
+[safe_rtt.probe]
+speed = 50
+
+[safe_rtt.rtt]
+enabled = true
+log_enabled = true
+log_path = "./target/rtt-logs"
+up_channels = [{ channel = 0, format = "Defmt" }]
+
+[safe_rtt_attach.probe]
+speed = 50
+
+[safe_rtt_attach.flashing]
+enabled = false
+
+[safe_rtt_attach.reset]
+enabled = true
+halt_afterwards = false
+
+[safe_rtt_attach.rtt]
+enabled = true
+log_enabled = true
+log_path = "./target/rtt-logs"
+up_channels = [{ channel = 0, format = "Defmt" }]
 
 [attach.flashing]
 enabled = false

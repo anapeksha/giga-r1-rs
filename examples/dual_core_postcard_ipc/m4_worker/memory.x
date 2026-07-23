@@ -1,0 +1,16 @@
+MEMORY
+{
+  FLASH   (rx) : ORIGIN = 0x08100000, LENGTH = 1M
+  D2SRAM (rwx) : ORIGIN = 0x30000000, LENGTH = 256K
+  MAILBOX (rwx): ORIGIN = 0x38000400, LENGTH = 1K
+}
+
+REGION_ALIAS(RAM, D2SRAM);
+
+SECTIONS
+{
+  .ipc_mailbox (NOLOAD) : ALIGN(32)
+  {
+    KEEP(*(.ipc_mailbox));
+  } > MAILBOX
+}

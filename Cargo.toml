@@ -3,7 +3,12 @@ resolver = "2"
 members = [
     "crates/giga-r1",
     "examples/dual_core_m4",
+    "examples/dual_core_postcard_ipc/m4_worker",
+    "examples/dual_core_postcard_ipc/m7_master",
+    "examples/dual_core_postcard_ipc/protocol",
     "examples/m7_adc_read",
+    "examples/m7_arduino_pins",
+    "examples/m7_ble_beacon",
     "examples/m7_boot0_button",
     "examples/m7_dac_adc_loopback",
     "examples/m7_defmt_heartbeat",
@@ -41,17 +46,26 @@ defmt = "1.0.1"
 defmt-rtt = "1.0.0"
 embassy-executor = { version = "0.10.0", default-features = false }
 embassy-futures = "0.1.2"
+embassy-sync = "0.8.0"
 embassy-stm32 = { version = "0.6.0", default-features = false, features = [
     "rt",
     "unstable-pac",
 ] }
+embassy-time = "0.5.1"
 embassy-usb = "0.6.0"
 embedded-hal = "1.0.0"
 embedded-hal-async = "1.0.0"
 embedded-hal-nb = "1.0.0"
+embedded-io-async = "0.7.0"
 nb = "1.1.0"
 panic-halt = "1.0.0"
+postcard = { version = "1.1.3", default-features = false }
+serde = { version = "1.0.219", default-features = false }
 static_cell = "2.1.1"
+trouble-host = { version = "0.7.0", default-features = false, features = [
+    "default-packet-pool",
+    "peripheral",
+] }
 
 [workspace.lints.rust]
 unsafe_code = "deny"

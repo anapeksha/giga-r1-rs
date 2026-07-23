@@ -1,0 +1,20 @@
+[package]
+name = "dual-core-postcard-protocol"
+version = "0.1.0"
+edition.workspace = true
+publish = false
+
+[lib]
+test = false
+bench = false
+
+[dependencies]
+defmt = { workspace = true, optional = true }
+serde = { workspace = true, features = ["derive"] }
+
+[features]
+default = []
+defmt = ["dep:defmt"]
+
+[lints]
+workspace = true

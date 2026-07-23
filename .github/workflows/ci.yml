@@ -43,8 +43,8 @@ jobs:
 
       - name: Release build
         run: |
-          cargo build --workspace --exclude dual-core-m4 --target thumbv7em-none-eabihf --release
-          cargo build -p dual-core-m4 --target thumbv7em-none-eabihf --release
+          cargo build --workspace --exclude dual-core-m4 --exclude dual-core-postcard-m4-worker --target thumbv7em-none-eabihf --release
+          cargo build -p dual-core-m4 -p dual-core-postcard-m4-worker --target thumbv7em-none-eabihf --release
 
       - name: Docs
         env:

@@ -1,0 +1,28 @@
+[package]
+name = "m7-arduino-pins"
+version = "0.1.0"
+edition.workspace = true
+publish = false
+
+[[bin]]
+name = "m7-arduino-pins"
+path = "src/main.rs"
+test = false
+bench = false
+
+[dependencies]
+cortex-m.workspace = true
+cortex-m-rt.workspace = true
+defmt = { workspace = true, optional = true }
+defmt-rtt = { workspace = true, optional = true }
+embassy-stm32 = { workspace = true, features = ["stm32h747xi-cm7"] }
+embedded-hal.workspace = true
+giga-r1 = { path = "../../crates/giga-r1" }
+panic-halt.workspace = true
+
+[features]
+default = []
+defmt = ["dep:defmt", "dep:defmt-rtt", "giga-r1/defmt", "embassy-stm32/defmt"]
+
+[lints]
+workspace = true
