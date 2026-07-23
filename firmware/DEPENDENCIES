@@ -1,0 +1,7 @@
+4343WA1.bin
+  Origin: ArduinoCore-mbed GIGA board package, 4343WA1_bin.o
+  Runtime dependencies: 4343WA1.clm_blob and board-specific NVRAM data
+
+4343WA1.clm_blob
+  Origin: ArduinoCore-mbed GIGA board package, 4343WA1_clm_blob.o
+  Runtime dependencies: none

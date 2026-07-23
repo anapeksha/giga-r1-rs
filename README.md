@@ -61,3 +61,6 @@ datasheet, pinout, and the GIGA variant in ArduinoCore-mbed.
 ## License
 
 MIT
+
+The bundled CYW4343W firmware uses Cypress's separate
+[Permissive Binary License 1.0](firmware/LICENSE-permissive-binary-license-1.0.txt).

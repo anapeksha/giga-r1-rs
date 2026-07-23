@@ -50,3 +50,16 @@ enabled = true
 
 [rtt_attach.gdb]
 enabled = false
+
+[rtt_reset.flashing]
+enabled = false
+
+[rtt_reset.reset]
+enabled = true
+halt_afterwards = false
+
+[rtt_reset.rtt]
+enabled = true
+
+[rtt_reset.gdb]
+enabled = false

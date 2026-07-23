@@ -1,0 +1,40 @@
+[package]
+name = "m7-wifi-scan"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+publish = false
+build = "build.rs"
+
+[dependencies]
+aligned = "0.4.3"
+arduino-giga = { path = "../../crates/arduino-giga", features = ["wifi"] }
+cortex-m.workspace = true
+cortex-m-rt.workspace = true
+cyw43.workspace = true
+defmt = { workspace = true, optional = true }
+defmt-rtt = { workspace = true, optional = true }
+embassy-executor = { workspace = true, features = ["executor-thread", "platform-cortex-m"] }
+embassy-futures.workspace = true
+embassy-stm32 = { workspace = true, features = [
+    "stm32h747xi-cm7",
+    "cyw43",
+    "time-driver-tim2",
+] }
+embassy-time = "0.5.1"
+panic-halt.workspace = true
+static_cell.workspace = true
+
+[features]
+default = []
+defmt = [
+    "dep:defmt",
+    "dep:defmt-rtt",
+    "arduino-giga/defmt",
+    "cyw43/defmt",
+    "embassy-executor/defmt",
+    "embassy-stm32/defmt",
+]
+
+[lints]
+workspace = true

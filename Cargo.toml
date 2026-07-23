@@ -18,6 +18,7 @@ members = [
     "examples/m7_uart_loopback",
     "examples/m7_usb_serial",
     "examples/m7_wifi_sdio_probe",
+    "examples/m7_wifi_scan",
 ]
 
 [workspace.package]
@@ -34,6 +35,7 @@ categories = ["embedded", "hardware-support", "no-std"]
 [workspace.dependencies]
 cortex-m = { version = "0.7.7", features = ["critical-section-single-core"] }
 cortex-m-rt = "0.7.5"
+cyw43 = { version = "0.7.0", default-features = false }
 critical-section = "1.2.0"
 defmt = "1.0.1"
 defmt-rtt = "1.0.0"
@@ -48,6 +50,7 @@ embedded-hal = "1.0.0"
 embedded-hal-nb = "1.0.0"
 nb = "1.1.0"
 panic-halt = "1.0.0"
+static_cell = "2.1.1"
 
 [workspace.lints.rust]
 unsafe_code = "deny"
