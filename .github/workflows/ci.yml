@@ -42,7 +42,9 @@ jobs:
         run: cargo check --workspace --target thumbv7em-none-eabihf --all-features
 
       - name: Release build
-        run: cargo build --workspace --target thumbv7em-none-eabihf --release
+        run: |
+          cargo build --workspace --exclude dual-core-m4 --target thumbv7em-none-eabihf --release
+          cargo build -p dual-core-m4 --target thumbv7em-none-eabihf --release
 
       - name: Docs
         env:
