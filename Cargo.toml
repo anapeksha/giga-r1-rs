@@ -16,6 +16,7 @@ members = [
     "examples/m7_rgb_blinky",
     "examples/m7_spi_loopback",
     "examples/m7_uart_loopback",
+    "examples/m7_usb_serial",
 ]
 
 [workspace.package]
@@ -36,10 +37,12 @@ critical-section = "1.2.0"
 defmt = "1.0.1"
 defmt-rtt = "1.0.0"
 embassy-executor = { version = "0.10.0", default-features = false }
+embassy-futures = "0.1.2"
 embassy-stm32 = { version = "0.6.0", default-features = false, features = [
     "rt",
     "unstable-pac",
 ] }
+embassy-usb = "0.6.0"
 embedded-hal = "1.0.0"
 embedded-hal-nb = "1.0.0"
 nb = "1.1.0"

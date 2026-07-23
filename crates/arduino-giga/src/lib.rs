@@ -10,6 +10,8 @@ pub mod pins;
 pub mod can;
 #[cfg(feature = "qspi")]
 pub mod qspi;
+#[cfg(feature = "usb")]
+pub mod usb;
 #[cfg(feature = "wifi")]
 pub mod wifi;
 
