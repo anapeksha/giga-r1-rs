@@ -42,6 +42,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "giga-r1-wifi-firmware"
+version = "0.1.0"
+dependencies = [
+ "aligned",
+]
+
+[[package]]
 name = "as-slice"
 version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"

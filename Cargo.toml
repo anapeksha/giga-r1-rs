@@ -3,6 +3,7 @@ resolver = "2"
 exclude = ["examples/dual_core_m4"]
 members = [
     "crates/giga-r1",
+    "firmware",
     "examples/m7_adc_read",
     "examples/m7_boot0_button",
     "examples/m7_dac_adc_loopback",
@@ -33,6 +34,7 @@ keywords = ["stm32h747", "embedded", "arduino", "giga", "no-std"]
 categories = ["embedded", "hardware-support", "no-std"]
 
 [workspace.dependencies]
+aligned = "0.4.3"
 cortex-m = { version = "0.7.7", features = ["critical-section-single-core"] }
 cortex-m-rt = "0.7.5"
 cyw43 = { version = "0.7.0", default-features = false }
