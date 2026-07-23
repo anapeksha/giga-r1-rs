@@ -144,6 +144,11 @@ pub const SERIAL3_RX: PinId = p(Port::I, 9);
 pub const SERIAL4_TX: PinId = p(Port::G, 14);
 pub const SERIAL4_RX: PinId = p(Port::C, 7);
 
+pub const SPI_CS: PinId = p(Port::K, 1);
+pub const SPI_MOSI: PinId = p(Port::J, 10);
+pub const SPI_MISO: PinId = p(Port::J, 11);
+pub const SPI_SCK: PinId = p(Port::H, 6);
+
 const fn p(port: Port, pin: u8) -> PinId {
     PinId::new(port, pin)
 }
