@@ -6,6 +6,12 @@ license.workspace = true
 publish = false
 build = "build.rs"
 
+[[bin]]
+name = "m7-defmt-heartbeat"
+path = "src/main.rs"
+test = false
+bench = false
+
 [dependencies]
 giga-r1 = { path = "../../crates/giga-r1" }
 cortex-m.workspace = true
