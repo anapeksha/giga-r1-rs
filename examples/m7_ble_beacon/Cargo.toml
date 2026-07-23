@@ -1,0 +1,41 @@
+[package]
+name = "m7-ble-beacon"
+version = "0.1.0"
+edition.workspace = true
+publish = false
+
+[[bin]]
+name = "m7-ble-beacon"
+path = "src/main.rs"
+test = false
+bench = false
+
+[dependencies]
+bt-hci = "0.9.0"
+cortex-m.workspace = true
+cortex-m-rt.workspace = true
+defmt = { workspace = true, optional = true }
+defmt-rtt = { workspace = true, optional = true }
+embassy-executor = { workspace = true, features = ["executor-thread", "platform-cortex-m"] }
+embassy-futures.workspace = true
+embassy-stm32 = { workspace = true, features = ["stm32h747xi-cm7", "time-driver-tim5"] }
+embassy-sync.workspace = true
+embassy-time.workspace = true
+giga-r1 = { path = "../../crates/giga-r1", features = ["ble"] }
+panic-halt.workspace = true
+trouble-host.workspace = true
+
+[features]
+default = []
+defmt = [
+    "dep:defmt",
+    "dep:defmt-rtt",
+    "bt-hci/defmt",
+    "embassy-executor/defmt",
+    "embassy-stm32/defmt",
+    "giga-r1/defmt",
+    "trouble-host/defmt",
+]
+
+[lints]
+workspace = true

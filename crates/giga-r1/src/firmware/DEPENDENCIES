@@ -10,3 +10,10 @@
   SHA-256: 33339b0101b7130e81a1e8be9056ee6ef1756190a7e7aa1838b233319fac436f
   License: Cypress Permissive Binary License 1.0, reproduced in the repository LICENSE
   Runtime dependencies: none
+
+4343WA1.hcd
+  Origin: Arduino mbed-os CYW43XXX COMPONENT_4343W Bluetooth controller firmware
+  Version: BCM4343A1_001.002.009.0083.0000_Generic_UART_37_4MHz_wlbga_wiced
+  SHA-256: d270d48a0038885e57cdf0096e2004ade1719906753d7979a5ffd344044b14ea
+  License: Cypress Permissive Binary License 1.0, reproduced in the repository LICENSE
+  Runtime dependencies: UART HCI patchram loader

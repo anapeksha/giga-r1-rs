@@ -1,7 +1,7 @@
 [package]
 name = "giga-r1"
 description = "Rust no_std board support package for the dual-core Arduino GIGA R1 WiFi."
-version = "0.1.0"
+version = "0.2.0"
 edition.workspace = true
 license-file = "../../LICENSE"
 rust-version.workspace = true
@@ -19,6 +19,9 @@ cyw43 = { workspace = true, optional = true }
 defmt = { workspace = true, optional = true }
 embedded-hal.workspace = true
 embedded-hal-async = { workspace = true, optional = true }
+embedded-io-async = { workspace = true, optional = true }
+postcard = { workspace = true, optional = true }
+serde = { workspace = true, optional = true }
 
 [features]
 default = []
@@ -30,7 +33,13 @@ audio = []
 camera = []
 can = []
 display = []
+ble = ["dep:embedded-hal-async", "dep:embedded-io-async"]
 dual-core = ["dep:cortex-m"]
+ipc = [
+    "dual-core",
+    "dep:postcard",
+    "dep:serde",
+]
 qspi = []
 sdcard = []
 usb = []
