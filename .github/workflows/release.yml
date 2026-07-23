@@ -1,0 +1,58 @@
+name: Release
+
+on:
+  release:
+    types: [published]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  publish:
+    name: Publish crate
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+          targets: thumbv7em-none-eabihf
+
+      - name: Cache Cargo
+        uses: Swatinem/rust-cache@v2
+
+      - name: Verify release tag
+        shell: bash
+        run: |
+          version="$(cargo metadata --no-deps --format-version 1 | jq -r '.packages[] | select(.name == "giga-r1") | .version')"
+          tag="${GITHUB_REF_NAME}"
+          if [[ "${tag}" != "v${version}" ]]; then
+            echo "Release tag ${tag} does not match giga-r1 crate version v${version}"
+            exit 1
+          fi
+
+      - name: Validate
+        env:
+          RUSTDOCFLAGS: -D warnings
+        run: |
+          cargo fmt --check --all
+          cargo clippy --workspace --target thumbv7em-none-eabihf --all-targets -- -D warnings
+          cargo check --workspace --target thumbv7em-none-eabihf --all-features
+          cargo build --workspace --target thumbv7em-none-eabihf --release
+          cargo doc -p giga-r1 --target thumbv7em-none-eabihf --all-features --no-deps
+
+      - name: Authenticate with crates.io
+        id: auth
+        uses: rust-lang/crates-io-auth-action@v1
+
+      - name: Publish crate
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
+        run: cargo publish -p giga-r1 --target thumbv7em-none-eabihf
