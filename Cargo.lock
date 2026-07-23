@@ -928,6 +928,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "m7-wifi-sdio-probe"
+version = "0.1.0"
+dependencies = [
+ "arduino-giga",
+ "cortex-m",
+ "cortex-m-rt",
+ "defmt 1.1.1",
+ "defmt-rtt",
+ "embassy-executor",
+ "embassy-stm32",
+ "panic-halt",
+]
+
+[[package]]
 name = "matchers"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"

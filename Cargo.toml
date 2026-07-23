@@ -17,6 +17,7 @@ members = [
     "examples/m7_spi_loopback",
     "examples/m7_uart_loopback",
     "examples/m7_usb_serial",
+    "examples/m7_wifi_sdio_probe",
 ]
 
 [workspace.package]
