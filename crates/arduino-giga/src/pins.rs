@@ -149,6 +149,11 @@ pub const SPI_MOSI: PinId = p(Port::J, 10);
 pub const SPI_MISO: PinId = p(Port::J, 11);
 pub const SPI_SCK: PinId = p(Port::H, 6);
 
+/// A12 / DAC1 channel 1.
+pub const DAC0: PinId = p(Port::A, 4);
+/// A13 / DAC1 channel 2.
+pub const DAC1: PinId = p(Port::A, 5);
+
 const fn p(port: Port, pin: u8) -> PinId {
     PinId::new(port, pin)
 }

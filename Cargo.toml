@@ -4,6 +4,7 @@ members = [
     "crates/arduino-giga",
     "examples/m7_adc_read",
     "examples/m7_boot0_button",
+    "examples/m7_dac_adc_loopback",
     "examples/m7_defmt_heartbeat",
     "examples/m7_exti_button",
     "examples/m7_gpio_loopback",
