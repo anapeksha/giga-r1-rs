@@ -1,0 +1,17 @@
+[default.general]
+chip = "STM32H747XIHx"
+connect_under_reset = true
+
+[default.probe]
+protocol = "Swd"
+speed = 8000
+
+[default.reset]
+halt_afterwards = false
+
+[default.rtt]
+enabled = true
+
+
+[default.gdb]
+enabled = false
