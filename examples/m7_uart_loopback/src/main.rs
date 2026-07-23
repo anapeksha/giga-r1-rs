@@ -30,60 +30,80 @@ fn main() -> ! {
     let mut expected = 0x31_u8;
 
     loop {
-        let write_result = uart
-            .blocking_write(&[expected])
-            .and_then(|()| uart.blocking_flush());
-        let mut received = None;
-        let mut receive_error = false;
+        let frame = [0x55, 0xaa, expected, !expected];
+        let mut passed = false;
+        let mut receive_errors = 0_u32;
 
-        // Avoid hiding a missing RX signal in an infinite blocking read.
-        for _ in 0..20_000_000 {
-            match embedded_hal_nb::serial::Read::read(&mut uart) {
-                Ok(byte) => {
-                    received = Some(byte);
-                    break;
-                }
-                Err(nb::Error::WouldBlock) => {}
-                Err(nb::Error::Other(_error)) => {
-                    receive_error = true;
-                    #[cfg(feature = "defmt")]
-                    defmt::warn!(
-                        "USART1 transient receive error: {}",
-                        defmt::Debug2Format(&_error)
-                    );
+        // A live jumper insertion can look like a partial UART byte. Drain old
+        // input and search for a framed message so that one noisy edge cannot
+        // produce a misleading wrong-byte indication.
+        for _attempt in 0..3 {
+            for _ in 0..256 {
+                match embedded_hal_nb::serial::Read::read(&mut uart) {
+                    Ok(_) => {}
+                    Err(nb::Error::WouldBlock) => break,
+                    Err(nb::Error::Other(_)) => {
+                        receive_errors = receive_errors.saturating_add(1);
+                    }
                 }
             }
+
+            if uart
+                .blocking_write(&frame)
+                .and_then(|()| uart.blocking_flush())
+                .is_err()
+            {
+                continue;
+            }
+
+            let mut sync_index = 0_u8;
+            for _ in 0..10_000_000 {
+                match embedded_hal_nb::serial::Read::read(&mut uart) {
+                    Ok(byte) => {
+                        sync_index = match sync_index {
+                            0 if byte == frame[0] => 1,
+                            1 if byte == frame[1] => 2,
+                            2 if byte == frame[2] => 3,
+                            3 if byte == frame[3] => {
+                                passed = true;
+                                break;
+                            }
+                            _ if byte == frame[0] => 1,
+                            _ => 0,
+                        };
+                    }
+                    Err(nb::Error::WouldBlock) => {}
+                    Err(nb::Error::Other(_)) => {
+                        receive_errors = receive_errors.saturating_add(1);
+                        sync_index = 0;
+                    }
+                }
+            }
+            if passed {
+                break;
+            }
         }
-        let passed = write_result.is_ok() && received == Some(expected);
 
         if passed {
             red.set_high();
             green.set_low();
             blue.set_high();
             #[cfg(feature = "defmt")]
-            defmt::info!("USART1 loopback passed: {=u8:#04x}", expected);
-        } else if receive_error {
-            green.set_high();
-            red.set_low();
-            blue.set_low();
-            #[cfg(feature = "defmt")]
-            defmt::error!("USART1 loopback receive error");
-        } else if let Some(byte) = received {
-            green.set_low();
-            red.set_low();
-            blue.set_high();
-            #[cfg(feature = "defmt")]
-            defmt::error!(
-                "USART1 wrong byte: sent {=u8:#04x}, received {=u8:#04x}",
+            defmt::info!(
+                "USART1 loopback passed: sequence={=u8:#04x}, transient_errors={=u32}",
                 expected,
-                byte
+                receive_errors
             );
         } else {
             green.set_high();
             red.set_low();
             blue.set_high();
             #[cfg(feature = "defmt")]
-            defmt::error!("USART1 loopback timed out with no received byte");
+            defmt::error!(
+                "USART1 loopback disconnected or timed out: sequence={=u8:#04x}, transient_errors={=u32}",
+                expected,
+                receive_errors
+            );
         }
 
         cortex_m::asm::delay(240_000_000);
