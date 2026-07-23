@@ -1,6 +1,6 @@
 [default.general]
-chip = "STM32H747XIHx"
-connect_under_reset = true
+chip = "STM32H747XI"
+connect_under_reset = false
 
 [default.probe]
 protocol = "Swd"
@@ -10,8 +10,31 @@ speed = 8000
 halt_afterwards = false
 
 [default.rtt]
-enabled = true
+enabled = false
 
+[with_rtt.rtt]
+enabled = true
 
 [default.gdb]
 enabled = false
+
+[debug.reset]
+halt_afterwards = true
+
+[debug.gdb]
+enabled = true
+
+[recover.general]
+connect_under_reset = true
+
+[recover.probe]
+speed = 1000
+
+[attach.flashing]
+enabled = false
+
+[attach.reset]
+enabled = false
+
+[attach.gdb]
+enabled = true

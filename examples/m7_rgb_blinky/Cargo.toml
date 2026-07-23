@@ -1,0 +1,29 @@
+[package]
+name = "m7-rgb-blinky"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+publish = false
+build = "build.rs"
+
+[dependencies]
+arduino-giga = { path = "../../crates/arduino-giga" }
+cortex-m.workspace = true
+cortex-m-rt.workspace = true
+defmt = { workspace = true, optional = true }
+defmt-rtt = { workspace = true, optional = true }
+embassy-stm32 = { workspace = true, features = ["stm32h747xi-cm7"] }
+panic-halt.workspace = true
+
+[features]
+default = []
+defmt = [
+    "dep:defmt",
+    "dep:defmt-rtt",
+    "arduino-giga/defmt",
+    "embassy-stm32/defmt",
+]
+
+[lints]
+workspace = true
+
