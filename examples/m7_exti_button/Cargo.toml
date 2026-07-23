@@ -8,15 +8,12 @@ build = "build.rs"
 
 [dependencies]
 arduino-giga = { path = "../../crates/arduino-giga" }
+cortex-m.workspace = true
 cortex-m-rt.workspace = true
 defmt = { workspace = true, optional = true }
 defmt-rtt = { workspace = true, optional = true }
-embassy-executor.workspace = true
-embassy-stm32 = { workspace = true, features = [
-    "executor-thread",
-    "stm32h747xi-cm7",
-    "time-driver-any",
-] }
+embassy-executor = { workspace = true, features = ["executor-thread", "platform-cortex-m"] }
+embassy-stm32 = { workspace = true, features = ["exti", "stm32h747xi-cm7"] }
 panic-halt.workspace = true
 
 [features]

@@ -21,10 +21,7 @@ bind_interrupts!(struct Irqs {
 #[unsafe(link_section = ".shared_data")]
 static SHARED_DATA: MaybeUninit<SharedData> = MaybeUninit::uninit();
 
-#[embassy_executor::main(
-    executor = "embassy_stm32::executor::Executor",
-    entry = "cortex_m_rt::entry"
-)]
+#[embassy_executor::main]
 async fn main(_spawner: embassy_executor::Spawner) {
     let p = embassy_stm32::init_primary(embassy_stm32::Config::default(), &SHARED_DATA);
 
