@@ -29,6 +29,9 @@ jobs:
       - name: Metadata
         run: cargo metadata --no-deps --format-version 1
 
+      - name: Install firmware build tools
+        run: cargo install flip-link --locked
+
       - name: Format
         run: cargo fmt --check --all
 
