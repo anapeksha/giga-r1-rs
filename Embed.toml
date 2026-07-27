@@ -11,10 +11,8 @@ speed = 8000
 halt_afterwards = false
 
 [default.rtt]
-enabled = false
-
-[with_rtt.rtt]
 enabled = true
+up_channels = [{ channel = 0, format = "Defmt" }]
 
 [default.gdb]
 enabled = false
@@ -22,76 +20,6 @@ enabled = false
 [debug.reset]
 halt_afterwards = true
 
-[debug.gdb]
-enabled = true
-
-[recover.general]
-connect_under_reset = true
-
-[recover.probe]
-speed = 1000
-
-[slow.probe]
-speed = 1000
-
-[safe.probe]
-speed = 50
-
-[safe_rtt.probe]
-speed = 50
-
-[safe_rtt.rtt]
-enabled = true
-log_enabled = true
-log_path = "./target/rtt-logs"
-up_channels = [{ channel = 0, format = "Defmt" }]
-
-[safe_rtt_attach.probe]
-speed = 50
-
-[safe_rtt_attach.flashing]
-enabled = false
-
 [safe_rtt_attach.reset]
 enabled = true
 halt_afterwards = false
-
-[safe_rtt_attach.rtt]
-enabled = true
-log_enabled = true
-log_path = "./target/rtt-logs"
-up_channels = [{ channel = 0, format = "Defmt" }]
-
-[attach.flashing]
-enabled = false
-
-[attach.reset]
-enabled = false
-
-[attach.gdb]
-enabled = true
-
-[rtt_attach.flashing]
-enabled = false
-
-[rtt_attach.reset]
-enabled = false
-
-[rtt_attach.rtt]
-enabled = true
-
-[rtt_attach.gdb]
-enabled = false
-
-[rtt_reset.flashing]
-enabled = false
-
-[rtt_reset.reset]
-enabled = true
-halt_afterwards = false
-
-[rtt_reset.rtt]
-enabled = true
-
-[rtt_reset.gdb]
-enabled = false
