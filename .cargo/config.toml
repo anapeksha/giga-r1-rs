@@ -1,11 +1,15 @@
+[env]
+DEFMT_LOG = "info"
+
 [build]
 target = "thumbv7em-none-eabihf"
 
 [target.thumbv7em-none-eabihf]
-rustflags = [
-    "-C",
-    "link-arg=-Tlink.x",
-]
+runner = "cargo embed --path"
 
-[env]
-DEFMT_LOG = "info"
+linker = "flip-link"
+
+rustflags = [
+    "-C", "link-arg=--nmagic",   # Disables section page alignment to save valuable flash space
+    "-C", "link-arg=-Tlink.x",   # Loads the core memory layout script (requires a memory.x file)
+]
