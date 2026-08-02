@@ -25,6 +25,7 @@ members = [
     "examples/m7_wifi_sdio_probe",
     "examples/m7_wifi_scan",
 ]
+exclude = ["template"]
 
 [workspace.package]
 edition = "2024"

@@ -1,0 +1,24 @@
+[package]
+name = "giga-m4"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+publish = false
+build = "build.rs"
+
+[[bin]]
+name = "giga-m4"
+path = "src/main.rs"
+test = false
+bench = false
+
+[dependencies]
+cortex-m.workspace = true
+cortex-m-rt.workspace = true
+embassy-stm32 = { workspace = true, features = ["stm32h747xi-cm4"] }
+giga-r1.workspace = true
+panic-halt.workspace = true
+
+[lints]
+workspace = true

@@ -1,0 +1,13 @@
+[env]
+DEFMT_LOG = "info"
+
+[build]
+target = "thumbv7em-none-eabihf"
+
+[target.thumbv7em-none-eabihf]
+runner = "cargo embed --path"
+linker = "flip-link"
+rustflags = [
+    "-C", "link-arg=--nmagic",
+    "-C", "link-arg=-Tlink.x",
+]
