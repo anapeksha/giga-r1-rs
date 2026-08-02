@@ -1,0 +1,30 @@
+[workspace]
+resolver = "2"
+members = ["m7", "m4"]
+default-members = ["m7"]
+
+[workspace.package]
+edition = "2024"
+license = "MIT"
+rust-version = "1.88"
+
+[workspace.dependencies]
+cortex-m = { version = "0.7.7", features = ["critical-section-single-core"] }
+cortex-m-rt = "0.7.5"
+defmt = "1.0.1"
+defmt-rtt = "1.0.0"
+embassy-stm32 = { version = "0.6.0", default-features = false, features = ["rt", "unstable-pac"] }
+giga-r1 = { version = "0.2.0", features = ["dual-core"] }
+panic-halt = "1.0.0"
+
+[workspace.lints.rust]
+unsafe_code = "deny"
+
+[workspace.lints.clippy]
+large_stack_frames = "deny"
+mem_forget = "deny"
+
+[profile.release]
+debug = 2
+lto = "thin"
+opt-level = "s"

@@ -114,6 +114,15 @@ application may choose a different async executor or BLE host.
 The M7 is responsible for clock-tree setup and releasing the M4. Both images
 communicate through the crate's shared mailbox in D3 SRAM.
 
+A standalone [`template/`](template) workspace provides a minimal dual-core
+starting point that can be instantiated with Cargo Generate and flashed with
+Cargo Embed. It includes both core images, linker maps, the custom probe-rs chip
+description, RTT logging, and a mailbox heartbeat:
+
+```sh
+cargo generate --path template --name my-giga-app
+```
+
 With the `ipc` feature, `Channel<T, R>` serializes typed requests and responses
 into an allocation-free 256-byte postcard frame. Atomic word storage and
 release/acquire publication make the single-client/single-worker mailbox safe
