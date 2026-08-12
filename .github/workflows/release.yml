@@ -25,6 +25,9 @@ jobs:
           components: clippy, rustfmt
           targets: thumbv7em-none-eabihf
 
+      - name: Install flip-link
+        run: cargo install flip-link --locked
+
       - name: Cache Cargo
         uses: Swatinem/rust-cache@v2
 
