@@ -18,7 +18,7 @@ the M4 bridge example demonstrates a runtime-independent application.
 
 ```toml
 [dependencies]
-giga-r1 = "0.2"
+giga-r1 = "0.3"
 ```
 
 Optional hardware features are disabled by default:
@@ -81,6 +81,26 @@ descriptions otherwise try to halt the unavailable M4 and time out.
 The onboard RGB LED is active-low. The test displays red, green, and blue in
 sequence.
 
+## Onboard QSPI flash
+
+With the `qspi` feature, `giga-r1` exposes both the bank-1 routing metadata and
+an Embassy-backed NOR flash wrapper for the onboard 16 MiB QSPI flash. The
+wrapper implements `embedded-storage-async` `ReadNorFlash` and `NorFlash`, uses
+4 KiB sector erase and 256-byte page program operations, and leaves storage
+ranges and data formats to the application:
+
+```rust,ignore
+let mut flash = giga_r1::qspi::OnboardQspiFlash::new(
+    p.QUADSPI, p.PD11, p.PD12, p.PE2, p.PF6, p.PF10, p.PG6,
+)
+.await?;
+let jedec = flash.read_jedec_id().await?;
+```
+
+Use this with generic storage crates such as `sequential-storage` by passing a
+chosen application range and `&mut flash`; the BSP does not reserve persistence
+regions or impose a database policy.
+
 Wi-Fi initialization owns the GIGA power sequence, CYW4343W firmware, NVRAM,
 and country data. Because the CYW43 runner consumes itself and must be polled
 continuously, the crate returns that runner to the application for execution by
@@ -104,12 +124,12 @@ application may choose a different async executor or BLE host.
 
 ## Dual-core memory map
 
-| Owner | Flash | RAM |
-|---|---:|---:|
-| Bootloader | `0x0800_0000`, 256 KiB reserved | — |
-| Cortex-M7 application | `0x0804_0000`, 768 KiB | AXI SRAM at `0x2400_0000`, 512 KiB |
-| Cortex-M4 | `0x0810_0000`, 1 MiB | D2 SRAM at `0x3000_0000`, 256 KiB |
-| Shared | — | D3 SRAM at `0x3800_0000`, first 1 KiB |
+| Owner                 |                           Flash |                                   RAM |
+| --------------------- | ------------------------------: | ------------------------------------: |
+| Bootloader            | `0x0800_0000`, 256 KiB reserved |                                     — |
+| Cortex-M7 application |          `0x0804_0000`, 768 KiB |    AXI SRAM at `0x2400_0000`, 512 KiB |
+| Cortex-M4             |            `0x0810_0000`, 1 MiB |     D2 SRAM at `0x3000_0000`, 256 KiB |
+| Shared                |                               — | D3 SRAM at `0x3800_0000`, first 1 KiB |
 
 The M7 is responsible for clock-tree setup and releasing the M4. Both images
 communicate through the crate's shared mailbox in D3 SRAM.

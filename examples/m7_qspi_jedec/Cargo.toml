@@ -18,7 +18,9 @@ cortex-m.workspace = true
 cortex-m-rt.workspace = true
 defmt = { workspace = true, optional = true }
 defmt-rtt = { workspace = true, optional = true }
-embassy-stm32 = { workspace = true, features = ["stm32h747xi-cm7"] }
+embassy-executor = { workspace = true, features = ["platform-cortex-m", "executor-thread"] }
+embassy-stm32 = { workspace = true, features = ["stm32h747xi-cm7", "time-driver-tim3"] }
+embassy-time.workspace = true
 panic-halt.workspace = true
 
 [features]
@@ -27,7 +29,9 @@ defmt = [
     "dep:defmt",
     "dep:defmt-rtt",
     "giga-r1/defmt",
+    "embassy-executor/defmt",
     "embassy-stm32/defmt",
+    "embassy-time/defmt",
 ]
 
 [lints]

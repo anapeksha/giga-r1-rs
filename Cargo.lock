@@ -835,14 +835,17 @@ dependencies = [
 
 [[package]]
 name = "giga-r1"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "cortex-m",
  "cyw43",
  "defmt 1.1.1",
+ "embassy-stm32",
+ "embassy-time",
  "embedded-hal 1.0.0",
  "embedded-hal-async",
  "embedded-io-async 0.7.0",
+ "embedded-storage-async",
  "postcard",
  "serde",
 ]
@@ -1098,7 +1101,9 @@ dependencies = [
  "cortex-m-rt",
  "defmt 1.1.1",
  "defmt-rtt",
+ "embassy-executor",
  "embassy-stm32",
+ "embassy-time",
  "giga-r1",
  "panic-halt",
 ]
