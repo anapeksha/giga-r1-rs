@@ -14,7 +14,7 @@ cortex-m-rt = "0.7.5"
 defmt = "1.0.1"
 defmt-rtt = "1.0.0"
 embassy-stm32 = { version = "0.6.0", default-features = false, features = ["rt", "unstable-pac"] }
-giga-r1 = { version = "0.2.0", features = ["dual-core"] }
+giga-r1 = { version = "0.3.0", features = ["dual-core"] }
 panic-halt = "1.0.0"
 
 [workspace.lints.rust]

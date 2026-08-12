@@ -29,7 +29,11 @@ cargo generate --path template --name my-giga-app
 cd my-giga-app
 ```
 
-When this template is hosted in a Git repository, it can also be generated with `cargo generate --git <repository-url> --subfolder template`.
+When this template is hosted in a Git repository, pass `template` as the positional subfolder argument:
+
+```sh
+cargo generate --git <repository-url> template --name my-giga-app
+```
 
 ## Build
 

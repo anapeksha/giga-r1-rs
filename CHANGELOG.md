@@ -2,6 +2,17 @@
 
 All notable changes to this project are documented here.
 
+## 0.3.0 - 2026-08-13
+
+- Add an optional Embassy-backed `qspi::OnboardQspiFlash` wrapper for the
+  Arduino GIGA R1 onboard 16 MiB QSPI NOR flash.
+- Implement `embedded-storage-async` `ReadNorFlash` and `NorFlash` traits for
+  the onboard flash wrapper, including range/alignment validation, page-split
+  writes, sector erase, JEDEC ID reads, and configurable ready polling.
+- Keep QSPI storage dependencies behind the `qspi` feature and preserve the
+  existing `qspi::FLASH` routing metadata.
+- Update the QSPI JEDEC example to use the reusable board flash wrapper.
+
 ## 0.2.0 - 2026-07-24
 
 - Add owned Arduino D0–D75, A0–A13, and RGB pin wrappers with
