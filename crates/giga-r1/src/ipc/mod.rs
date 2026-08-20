@@ -1,9 +1,14 @@
-//! Typed, allocation-free Cortex-M7/Cortex-M4 request/response IPC.
+//! Allocation-free Cortex-M7/Cortex-M4 communication.
 //!
-//! The wire format is [`postcard`]. The mailbox itself uses atomic words so
-//! neither core creates a Rust reference to memory concurrently modified by
-//! the other core. Place exactly one [`IpcMailbox`] at the same non-cacheable
-//! D3 SRAM address in both images.
+//! [`Channel`] provides typed postcard request/response IPC for low-rate RPC.
+//! [`SharedQueue`] provides bounded SPSC transfer of larger binary blocks with
+//! multiple outstanding entries and no serialization. Both transports use
+//! atomic words so neither core creates a Rust reference to memory concurrently
+//! modified by the other core.
+//!
+//! Place matching concrete shared types at identical non-cacheable D3 SRAM
+//! addresses in both images. The application owns the linker allocation; large
+//! queues are not silently placed in the BSP's conventional 1 KiB IPC mailbox.
 
 use core::{
     future::Future,
@@ -12,6 +17,10 @@ use core::{
 };
 
 use serde::{Serialize, de::DeserializeOwned};
+
+mod queue;
+
+pub use queue::{Consumer, Producer, QueueError, SharedQueue};
 
 pub const IPC_MAGIC: u32 = 0x4950_4332;
 pub const IPC_CAPACITY: usize = 256;
@@ -30,6 +39,10 @@ pub trait Notify {
 /// An executor integration can implement this with an HSEM interrupt signal,
 /// an async event listener, or a timer. Keeping the future associated with the
 /// application avoids coupling `giga-r1` to a particular async runtime.
+///
+/// Implementations must latch notifications: if the peer notifies immediately
+/// before [`Self::wait`] is called, the returned future must still complete.
+/// This prevents a check-then-wait race from losing an edge-triggered doorbell.
 pub trait AsyncWait {
     type Wait<'a>: Future<Output = ()>
     where

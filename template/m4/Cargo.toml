@@ -19,6 +19,7 @@ cortex-m-rt.workspace = true
 embassy-stm32 = { workspace = true, features = ["stm32h747xi-cm4"] }
 giga-r1.workspace = true
 panic-halt.workspace = true
+serde.workspace = true
 
 [lints]
 workspace = true

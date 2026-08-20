@@ -18,7 +18,7 @@ the M4 bridge example demonstrates a runtime-independent application.
 
 ```toml
 [dependencies]
-giga-r1 = "0.3"
+giga-r1 = "0.4"
 ```
 
 Optional hardware features are disabled by default:
@@ -155,6 +155,37 @@ Synchronous callers supply their own idle/poll hook, while
 HSEM interrupt, event listener, or timer without making the crate
 executor-dependent. [`examples/dual_core_postcard_ipc`](examples/dual_core_postcard_ipc)
 offloads a fixed-point eight-point FFT power spectrum to the M4.
+
+For sustained binary traffic, `ipc::SharedQueue<WORDS, N>` provides a separate
+bounded SPSC transport with `N` outstanding blocks of up to `WORDS * 4` bytes.
+It copies through atomic words rather than postcard and never exposes shared
+mutable references. Producer publication and consumer slot release use
+release/acquire ordering, while `Notify` and `AsyncWait` remain pluggable for
+polling or an application-provided HSEM doorbell.
+
+Larger queues must be assigned an explicit, matching non-cacheable D3 SRAM
+region in both core linker scripts. For example:
+
+```ld
+MEMORY
+{
+  BULK (rwx): ORIGIN = 0x38000800, LENGTH = 16K
+}
+
+SECTIONS
+{
+  .bulk_queue (NOLOAD) : ALIGN(32)
+  {
+    KEEP(*(.bulk_queue));
+  } > BULK
+}
+```
+
+[`examples/dual_core_shared_queue`](examples/dual_core_shared_queue) demonstrates
+two `SharedQueue<384, 4>` instances moving generic 1,536-byte blocks in both
+directions. Their shared mailbox costs 12,416 bytes and fits in the example's
+explicit 16 KiB region; applications choose their own block size, depth, and
+D3 allocation.
 
 ## Option-byte recovery
 

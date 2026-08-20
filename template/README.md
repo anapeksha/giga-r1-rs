@@ -3,10 +3,10 @@
 A minimal dual-core Rust starter for the Arduino GIGA R1 WiFi's STM32H747XI:
 
 - `m7`: initializes the board and clock tree, releases the Cortex-M4, and shows inter-core status on the onboard RGB LED.
-- `m4`: runs a small mailbox worker in parallel on the Cortex-M4.
+- `m4`: runs a small typed IPC worker in parallel on the Cortex-M4.
 - `Embed.toml`: flashes either image through SWD with Cargo Embed and supports RTT/defmt output from the M7.
 
-The M7 sends an incrementing ping through shared D3 SRAM. The M4 replies. A blinking **green** onboard LED means both cores are running and communicating; **red** means the M4 did not reply.
+The M7 sends an incrementing typed `Ping` through shared D3 SRAM with `giga_r1::ipc::Channel`. The M4 returns a typed `Pong`. A blinking **green** onboard LED means both cores are running and communicating; **red** means the M4 did not reply.
 
 ## Prerequisites
 
@@ -52,12 +52,12 @@ relevant core when adding an interrupt-driven peripheral.
 
 The images use the same `thumbv7em-none-eabihf` Rust target, but distinct linker maps:
 
-| Image | Flash | RAM |
-|---|---:|---:|
-| Arduino bootloader (reserved) | `0x0800_0000`, 256 KiB | — |
-| M7 | `0x0804_0000`, 768 KiB | AXI SRAM, `0x2400_0000`, 512 KiB |
-| M4 | `0x0810_0000`, 1 MiB | D2 SRAM, `0x3000_0000`, 256 KiB |
-| Shared mailbox | — | D3 SRAM, `0x3800_0400`, 1 KiB |
+| Image                         |                  Flash |                              RAM |
+| ----------------------------- | ---------------------: | -------------------------------: |
+| Arduino bootloader (reserved) | `0x0800_0000`, 256 KiB |                                — |
+| M7                            | `0x0804_0000`, 768 KiB | AXI SRAM, `0x2400_0000`, 512 KiB |
+| M4                            |   `0x0810_0000`, 1 MiB |  D2 SRAM, `0x3000_0000`, 256 KiB |
+| Typed IPC mailbox             |                      — |    D3 SRAM, `0x3800_0400`, 1 KiB |
 
 Do not move the images over the reserved Arduino bootloader region unless you intentionally want to replace it.
 
@@ -79,7 +79,7 @@ For subsequent M7-only changes, `cargo run --release -p giga-m7` uses Cargo Embe
 - Put board initialization and peripheral ownership in `m7/src/main.rs`.
 - Put independent compute or real-time work in `m4/src/main.rs`.
 - Build the two core packages separately so Cargo does not unify their incompatible Embassy device features.
-- Keep shared data in the `.bridge_mailbox` linker section and use the `giga-r1` bridge/IPC APIs; ordinary statics are not automatically shared safely across the cache boundary.
-- For typed request/response messages, enable the `giga-r1` crate's `ipc` feature and use `giga_r1::ipc::Channel` with `serde` message types.
+- Keep typed IPC state in the `.ipc_mailbox` linker section and use `giga_r1::ipc::IpcMailbox` / `Channel`; ordinary statics are not automatically shared safely across the cache boundary.
+- For bulk binary traffic, use `giga_r1::ipc::SharedQueue` in an explicit larger D3 SRAM linker region; do not just increase the postcard RPC mailbox capacity.
 
-See the main [`giga-r1`](https://github.com/anapeksha/giga-r1-rs) repository for Arduino pin mappings and Wi-Fi, BLE, USB, CAN, QSPI, ADC, DAC, PWM, and typed dual-core IPC examples.
+See the main [`giga-r1`](https://github.com/anapeksha/giga-r1-rs) repository for Arduino pin mappings and Wi-Fi, BLE, USB, CAN, QSPI, ADC, DAC, PWM, typed dual-core IPC, and shared-queue bulk IPC examples.
