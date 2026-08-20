@@ -1,8 +1,9 @@
 [package]
 name = "giga-r1"
 description = "Rust no_std board support package for the dual-core Arduino GIGA R1 WiFi."
-version = "0.3.0"
+version = "0.4.0"
 edition.workspace = true
+autotests = false
 license-file = "../../LICENSE"
 rust-version.workspace = true
 authors.workspace = true
@@ -36,6 +37,7 @@ audio = []
 camera = []
 can = []
 display = []
+host-tests = []
 ble = ["dep:embedded-hal-async", "dep:embedded-io-async"]
 dual-core = ["dep:cortex-m"]
 ipc = [
@@ -68,3 +70,8 @@ workspace = true
 [lib]
 test = false
 bench = false
+
+[[test]]
+name = "shared_queue"
+path = "tests/shared_queue.rs"
+required-features = ["ipc", "host-tests"]

@@ -1,0 +1,21 @@
+[package]
+name = "dual-core-shared-queue-protocol"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+publish = false
+
+[lib]
+test = false
+bench = false
+
+[dependencies]
+defmt = { workspace = true, optional = true }
+giga-r1 = { path = "../../../crates/giga-r1", features = ["ipc"] }
+
+[features]
+default = []
+defmt = ["dep:defmt", "giga-r1/defmt"]
+
+[lints]
+workspace = true

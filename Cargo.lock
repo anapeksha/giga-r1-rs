@@ -379,6 +379,41 @@ dependencies = [
 ]
 
 [[package]]
+name = "dual-core-shared-queue-m4-worker"
+version = "0.1.0"
+dependencies = [
+ "cortex-m",
+ "cortex-m-rt",
+ "defmt 1.1.1",
+ "defmt-rtt",
+ "dual-core-shared-queue-protocol",
+ "giga-r1",
+ "panic-halt",
+]
+
+[[package]]
+name = "dual-core-shared-queue-m7-master"
+version = "0.1.0"
+dependencies = [
+ "cortex-m",
+ "cortex-m-rt",
+ "defmt 1.1.1",
+ "defmt-rtt",
+ "dual-core-shared-queue-protocol",
+ "embassy-stm32",
+ "giga-r1",
+ "panic-halt",
+]
+
+[[package]]
+name = "dual-core-shared-queue-protocol"
+version = "0.1.0"
+dependencies = [
+ "defmt 1.1.1",
+ "giga-r1",
+]
+
+[[package]]
 name = "embassy-embedded-hal"
 version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -835,7 +870,7 @@ dependencies = [
 
 [[package]]
 name = "giga-r1"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "cortex-m",
  "cyw43",

@@ -2,6 +2,21 @@
 
 All notable changes to this project are documented here.
 
+## 0.4.0 - 2026-08-19
+
+- Add `ipc::SharedQueue<WORDS, N>` with claimed `Producer` and `Consumer`
+  endpoints for bounded, allocation-free SPSC transfer of generic binary
+  blocks between the M7 and M4.
+- Preserve runtime-neutral polling and pluggable `Notify`/`AsyncWait` waiting,
+  with release/acquire publication and atomic-word payload storage that does not
+  expose concurrently mutable shared references.
+- Add host tests for full/empty handling, FIFO ordering, slot wraparound,
+  endpoint ownership, short buffers, notification, and concurrent traffic.
+- Add a dual-core example that round-trips generic 1,536-byte blocks through two
+  four-slot queues in an explicitly reserved 16 KiB D3 SRAM region.
+- Document queue memory cost, linker placement, non-cacheable D3 requirements,
+  and the distinction between typed postcard RPC and bulk block transport.
+
 ## 0.3.0 - 2026-08-13
 
 - Add an optional Embassy-backed `qspi::OnboardQspiFlash` wrapper for the

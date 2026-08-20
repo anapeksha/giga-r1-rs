@@ -14,8 +14,8 @@ SECTIONS
     KEEP(*(.shared_data));
   } > EMBASSY
 
-  .bridge_mailbox (NOLOAD) : ALIGN(32)
+  .ipc_mailbox (NOLOAD) : ALIGN(32)
   {
-    KEEP(*(.bridge_mailbox));
+    KEEP(*(.ipc_mailbox));
   } > MAILBOX
 }
