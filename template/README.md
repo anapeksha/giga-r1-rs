@@ -1,16 +1,21 @@
 # {{project-name}}
 
-A minimal dual-core Rust starter for the Arduino GIGA R1 WiFi's STM32H747XI:
+A GIGA R1 dual-core firmware starter with separate Cortex-M7 and Cortex-M4
+packages:
 
-- `m7`: initializes the board and clock tree, releases the Cortex-M4, and shows inter-core status on the onboard RGB LED.
-- `m4`: runs a small typed IPC worker in parallel on the Cortex-M4.
-- `Embed.toml`: flashes either image through SWD with Cargo Embed and supports RTT/defmt output from the M7.
+- `m7`: board owner, clock-tree setup, peripheral ownership, typed IPC mailbox
+  initialization, and M4 release.
+- `m4`: independent worker core for deterministic DSP, compute, or real-time
+  tasks.
+- `Embed.toml`: SWD flashing and RTT/defmt logging for the M7 image.
 
-The M7 sends an incrementing typed `Ping` through shared D3 SRAM with `giga_r1::ipc::Channel`. The M4 returns a typed `Pong`. A blinking **green** onboard LED means both cores are running and communicating; **red** means the M4 did not reply.
+The starter sends typed `Ping`/`Pong` messages through
+`giga_r1::ipc::Channel` in shared D3 SRAM. Green onboard LED means the M7 and
+M4 are communicating; red means the worker did not reply.
 
 ## Prerequisites
 
-Install Rust (via rustup), Cargo Generate, and the probe-rs tools:
+Install Rust, Cargo Generate, and probe-rs tools:
 
 ```sh
 cargo install cargo-generate
@@ -18,9 +23,10 @@ cargo install probe-rs-tools --locked
 cargo install flip-link
 ```
 
-Connect an SWD probe to the GIGA R1's SWD header. Cargo Embed cannot flash through the board's normal USB bootloader connection.
+Connect an SWD probe to the GIGA R1 SWD header. Cargo Embed cannot flash through
+the normal Arduino USB bootloader connection.
 
-## Create a project
+## Create an application
 
 From the `giga-r1-rs` repository:
 
@@ -29,13 +35,14 @@ cargo generate --path template --name my-giga-app
 cd my-giga-app
 ```
 
-When this template is hosted in a Git repository, pass `template` as the positional subfolder argument:
+When this template is hosted in a Git repository, pass `template` as the
+positional subfolder argument:
 
 ```sh
 cargo generate --git <repository-url> template --name my-giga-app
 ```
 
-## Build
+## Build firmware
 
 Build each core in a separate Cargo invocation:
 
@@ -44,13 +51,10 @@ cargo build -p giga-m4 --release
 cargo build -p giga-m7 --release
 ```
 
-Do not use `cargo build --workspace`: M4 and M7 select the mutually exclusive
-`stm32h747xi-cm4` and `stm32h747xi-cm7` Embassy device features. Separate
-invocations give each image the correct PAC interrupt table, so no handwritten
-`device.x` or interrupt vector table is needed. Use `bind_interrupts!` in the
-relevant core when adding an interrupt-driven peripheral.
-
-The images use the same `thumbv7em-none-eabihf` Rust target, but distinct linker maps:
+Do not use `cargo build --workspace`: M4 and M7 select mutually exclusive
+`stm32h747xi-cm4` and `stm32h747xi-cm7` Embassy device features. Separate builds
+preserve the correct PAC interrupt table and avoid handwritten `device.x` files.
+Use `bind_interrupts!` only when adding a real interrupt-driven peripheral.
 
 | Image                         |                  Flash |                              RAM |
 | ----------------------------- | ---------------------: | -------------------------------: |
@@ -59,7 +63,8 @@ The images use the same `thumbv7em-none-eabihf` Rust target, but distinct linker
 | M4                            |   `0x0810_0000`, 1 MiB |  D2 SRAM, `0x3000_0000`, 256 KiB |
 | Typed IPC mailbox             |                      — |    D3 SRAM, `0x3800_0400`, 1 KiB |
 
-Do not move the images over the reserved Arduino bootloader region unless you intentionally want to replace it.
+Do not move images over the Arduino bootloader region unless replacing it is an
+explicit application goal.
 
 ## Flash and run
 
@@ -70,16 +75,24 @@ cargo embed --path target/thumbv7em-none-eabihf/release/giga-m4
 cargo embed --release -p giga-m7
 ```
 
-Press the board's reset button after both images are programmed. The second command also displays M7 defmt logs over RTT. The custom `GIGA_R1_M7` probe-rs target intentionally exposes only the M7 debug access port: Arduino's normal option bytes hold the M4 in reset until the M7 application releases it, while the M7 can still program both flash banks.
+Press reset after both images are programmed. The M7 debug port can program both
+flash banks; the custom `GIGA_R1_M7` target intentionally exposes only the M7 AP
+because Arduino option bytes normally hold M4 until the M7 releases it.
 
-For subsequent M7-only changes, `cargo run --release -p giga-m7` uses Cargo Embed through `.cargo/config.toml`. Reflash the M4 image whenever `m4` changes.
+For later M7-only changes, `cargo run --release -p giga-m7` uses Cargo Embed via
+`.cargo/config.toml`. Reflash M4 whenever `m4` changes.
 
 ## Start building
 
-- Put board initialization and peripheral ownership in `m7/src/main.rs`.
-- Put independent compute or real-time work in `m4/src/main.rs`.
-- Build the two core packages separately so Cargo does not unify their incompatible Embassy device features.
-- Keep typed IPC state in the `.ipc_mailbox` linker section and use `giga_r1::ipc::IpcMailbox` / `Channel`; ordinary statics are not automatically shared safely across the cache boundary.
-- For bulk binary traffic, use `giga_r1::ipc::SharedQueue` in an explicit larger D3 SRAM linker region; do not just increase the postcard RPC mailbox capacity.
+- Put board initialization, peripheral setup, and application orchestration in
+  `m7/src/main.rs`.
+- Put deterministic compute, DSP, or real-time worker code in `m4/src/main.rs`.
+- Keep typed IPC state in `.ipc_mailbox` and use
+  `giga_r1::ipc::IpcMailbox` / `Channel`; ordinary statics are not
+  automatically shared safely across the cache boundary.
+- For bulk binary traffic, use `giga_r1::ipc::SharedQueue` in an explicit larger
+  D3 SRAM linker region; do not enlarge the postcard RPC mailbox.
 
-See the main [`giga-r1`](https://github.com/anapeksha/giga-r1-rs) repository for Arduino pin mappings and Wi-Fi, BLE, USB, CAN, QSPI, ADC, DAC, PWM, typed dual-core IPC, and shared-queue bulk IPC examples.
+See the main [`giga-r1`](https://github.com/anapeksha/giga-r1-rs) repository for
+Arduino pin mappings and Wi-Fi, BLE, USB, CAN, QSPI, raw audio buffers, typed
+dual-core IPC, and shared-queue bulk IPC examples.

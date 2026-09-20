@@ -2,6 +2,30 @@
 
 All notable changes to this project are documented here.
 
+## 0.5.0 - 2026-09-20
+
+- Add the `audio` feature module with HAL-neutral `AudioDevice`, `AudioConfig`,
+  `AudioPins`, `AudioPeripherals`, `AudioBuffer`, route metadata, sample-format
+  definitions, and explicit overrun/underrun reporting for raw buffered audio.
+- Document the Arduino GIGA R1 raw analog audio-capable route: `A0`/`PC4` for
+  ADC input and `A12`/`PA4`, `A13`/`PA5` for DAC output.
+- Add host tests for audio route metadata, interleaved buffer validation,
+  configured frame counts, callback processing, and stream-state counters.
+- Add `examples/m7_audio_process`, a generic M7 audio-buffer processing example
+  with gain and soft clipping where downstream applications can insert their own
+  DSP chain.
+- Refresh the generated template language toward an application-oriented
+  dual-core firmware style with typed IPC and M7/M4 package roles only.
+- Add `qspi::BlockingOnboardQspiFlash` and `BlockingQspiFlashConfig`, reusing
+  the existing onboard QSPI command path while implementing blocking
+  `embedded-storage` `ReadNorFlash` and `NorFlash` traits for bootloader or
+  synchronous storage users.
+- Preserve the existing async `OnboardQspiFlash` API and storage traits while
+  sharing range validation, status polling, 4 KiB sector erase, and 256-byte
+  page-program logic with the blocking wrapper.
+- Add `examples/m7_qspi_blocking_storage`, a destructive final-sector
+  erase/write/read verification example for the blocking NOR-flash interface.
+
 ## 0.4.0 - 2026-08-19
 
 - Add `ipc::SharedQueue<WORDS, N>` with claimed `Producer` and `Consumer`

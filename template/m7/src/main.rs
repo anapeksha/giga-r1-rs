@@ -7,8 +7,8 @@ use cortex_m_rt::entry;
 #[cfg(feature = "defmt")]
 use defmt_rtt as _;
 use embassy_stm32::{
-    gpio::{Level, Output, Speed},
     SharedData,
+    gpio::{Level, Output, Speed},
 };
 use giga_r1::{
     bridge::configure_m7_shared_sram,

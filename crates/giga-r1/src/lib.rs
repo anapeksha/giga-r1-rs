@@ -15,6 +15,8 @@
 //! [repository examples](https://github.com/anapeksha/giga-r1-rs/tree/main/examples)
 //! for tested Cortex-M7 and Cortex-M4 applications.
 
+#[cfg(feature = "audio")]
+pub mod audio;
 #[cfg(feature = "ble")]
 pub mod ble;
 mod board;

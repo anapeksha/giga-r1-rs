@@ -25,8 +25,10 @@ jobs:
           components: clippy, rustfmt
           targets: thumbv7em-none-eabihf
 
-      - name: Install flip-link
-        run: cargo install flip-link --locked
+      - name: Install firmware build tools
+        run: |
+          cargo install flip-link --locked
+          cargo install cargo-generate --locked
 
       - name: Cache Cargo
         uses: Swatinem/rust-cache@v2
@@ -49,8 +51,16 @@ jobs:
           cargo clippy --workspace --target thumbv7em-none-eabihf --all-targets -- -D warnings
           cargo check --workspace --target thumbv7em-none-eabihf --all-features
           cargo test -p giga-r1 --features ipc,host-tests --test shared_queue --target x86_64-unknown-linux-gnu
+          cargo test -p giga-r1 --features audio,host-tests --test audio_buffers --target x86_64-unknown-linux-gnu
           cargo build --workspace --exclude dual-core-m4 --exclude dual-core-postcard-m4-worker --exclude dual-core-shared-queue-m4-worker --target thumbv7em-none-eabihf --release
           cargo build -p dual-core-m4 -p dual-core-postcard-m4-worker -p dual-core-shared-queue-m4-worker --target thumbv7em-none-eabihf --release
+          cargo fmt --manifest-path template/Cargo.toml --all -- --check
+          cargo build --manifest-path template/Cargo.toml -p giga-m4 --release
+          cargo build --manifest-path template/Cargo.toml -p giga-m7 --release
+          rm -rf /tmp/giga-template-smoke
+          cargo generate --path template --name giga-template-smoke --destination /tmp
+          cargo build --manifest-path /tmp/giga-template-smoke/Cargo.toml -p giga-m4 --release
+          cargo build --manifest-path /tmp/giga-template-smoke/Cargo.toml -p giga-m7 --release
           cargo doc -p giga-r1 --target thumbv7em-none-eabihf --all-features --no-deps
 
       - name: Authenticate with crates.io
