@@ -44,8 +44,10 @@ jobs:
       - name: Check all features
         run: cargo check --workspace --target thumbv7em-none-eabihf --all-features
 
-      - name: Host shared-queue tests
-        run: cargo test -p giga-r1 --features ipc,host-tests --test shared_queue --target x86_64-unknown-linux-gnu
+      - name: Host tests
+        run: |
+          cargo test -p giga-r1 --features ipc,host-tests --test shared_queue --target x86_64-unknown-linux-gnu
+          cargo test -p giga-r1 --features audio,host-tests --test audio_buffers --target x86_64-unknown-linux-gnu
 
       - name: Release build
         run: |

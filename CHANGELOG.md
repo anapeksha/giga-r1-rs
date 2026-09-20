@@ -2,6 +2,22 @@
 
 All notable changes to this project are documented here.
 
+## 0.5.0 - 2026-09-20
+
+- Add the `audio` feature module with HAL-neutral `AudioDevice`, `AudioConfig`,
+  `AudioPins`, `AudioPeripherals`, `AudioBuffer`, route metadata, sample-format
+  definitions, and explicit overrun/underrun reporting for raw buffered audio.
+- Document the Arduino GIGA R1 raw analog audio-capable route: `A0`/`PC4` for
+  ADC input and `A12`/`PA4`, `A13`/`PA5` for DAC output.
+- Add host tests for audio route metadata, interleaved buffer validation,
+  configured frame counts, callback processing, and stream-state counters.
+- Add `examples/m7_audio_process`, a generic M7 audio-buffer processing example
+  with gain and soft clipping where downstream applications can insert their own
+  DSP chain.
+- Refresh the generated template language toward an application-oriented
+  `giga-fx` style with typed IPC, firmware roles, and a documented web dashboard
+  layout.
+
 ## 0.4.0 - 2026-08-19
 
 - Add `ipc::SharedQueue<WORDS, N>` with claimed `Producer` and `Consumer`

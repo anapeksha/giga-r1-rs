@@ -18,7 +18,7 @@ the M4 bridge example demonstrates a runtime-independent application.
 
 ```toml
 [dependencies]
-giga-r1 = "0.4"
+giga-r1 = "0.5"
 ```
 
 Optional hardware features are disabled by default:
@@ -60,6 +60,51 @@ let a0 = board.analog.a0.into_inner();
 The adapter preserves concrete analog channel types rather than erasing them
 to GPIO. A8–A11 are identified as the H747's analog-only companion pads,
 which Embassy does not currently expose as owned GPIO peripheral tokens.
+
+## Raw audio buffers
+
+With the `audio` feature, `giga-r1` exposes a HAL-neutral raw audio building
+block for the GIGA's board-level analog-capable route. The BSP documents and
+owns the relevant tokens, but leaves ADC/DAC timing, DMA, interrupt, executor,
+and external analog circuitry policy to the application:
+
+| Signal           | Arduino label | STM32 pin | Peripheral role |
+| ---------------- | ------------- | --------- | --------------- |
+| Input            | `A0`          | `PC4`     | ADC1 channel 4  |
+| Left/mono output | `A12`         | `PA4`     | DAC1 channel 1  |
+| Right output     | `A13`         | `PA5`     | DAC1 channel 2  |
+
+Buffers are interleaved by frame. Stereo `i16` uses `left0, right0, left1,
+right1, ...`; `SampleFormat::I24InI32` stores signed 24-bit PCM in `i32`, and
+`SampleFormat::F32` is available for applications that choose a floating-point
+DSP pipeline. `AudioBuffer` validates frame alignment and matching input/output
+lengths, while `AudioDevice` tracks explicit overrun/underrun counters without
+allocating.
+
+```rust,ignore
+let config = giga_r1::audio::AudioConfig::new(
+    48_000,
+    giga_r1::audio::ChannelLayout::Stereo,
+    giga_r1::audio::SampleFormat::I16,
+    64,
+);
+let mut audio = giga_r1::audio::AudioDevice::new(
+    config,
+    giga_r1::audio::AudioPeripherals::new(p.ADC1, p.DAC1),
+    giga_r1::audio::AudioPins::new(p.PC4, p.PA4, p.PA5),
+);
+let buffer = giga_r1::audio::AudioBuffer::new(&input, &mut output, config.channels)?;
+audio.process_buffer(buffer, |input, output| {
+    // Insert application DSP here: gain, EQ, compressor, effect chain, etc.
+    output.copy_from_slice(input);
+})?;
+```
+
+The board does not provide a BSP-owned high-quality onboard codec path. Real
+audio applications should add biasing, anti-alias filtering, reconstruction
+filtering, amplification, protection, and a timer/DMA setup suitable for the
+chosen sample rate. [`examples/m7_audio_process`](examples/m7_audio_process)
+shows the raw buffer handoff and a small gain/soft-clip transform.
 
 Build the first M7 board test:
 

@@ -870,7 +870,7 @@ dependencies = [
 
 [[package]]
 name = "giga-r1"
-version = "0.4.0"
+version = "0.5.0"
 dependencies = [
  "cortex-m",
  "cyw43",
@@ -999,6 +999,19 @@ dependencies = [
  "defmt-rtt",
  "embassy-stm32",
  "embedded-hal 1.0.0",
+ "giga-r1",
+ "panic-halt",
+]
+
+[[package]]
+name = "m7-audio-process"
+version = "0.1.0"
+dependencies = [
+ "cortex-m",
+ "cortex-m-rt",
+ "defmt 1.1.1",
+ "defmt-rtt",
+ "embassy-stm32",
  "giga-r1",
  "panic-halt",
 ]
