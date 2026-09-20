@@ -1,16 +1,17 @@
 # {{project-name}}
 
-A GIGA R1 application starter for building dual-core firmware in the style of a
-`giga-fx` project:
+A GIGA R1 dual-core firmware starter with separate Cortex-M7 and Cortex-M4
+packages:
 
-- `m7`: board owner, clock/tree setup, peripherals, Wi-Fi/network policy, UI/API serving, and M4 release.
-- `m4`: independent worker core for deterministic DSP, compute, or real-time tasks.
-- `web`: browser dashboard source and built assets for app control/status pages.
+- `m7`: board owner, clock-tree setup, peripheral ownership, typed IPC mailbox
+  initialization, and M4 release.
+- `m4`: independent worker core for deterministic DSP, compute, or real-time
+  tasks.
 - `Embed.toml`: SWD flashing and RTT/defmt logging for the M7 image.
 
-The starter sends typed `Ping`/`Pong` messages through `giga_r1::ipc::Channel` in
-shared D3 SRAM. Green onboard LED means the M7 and M4 are communicating; red
-means the worker did not reply.
+The starter sends typed `Ping`/`Pong` messages through
+`giga_r1::ipc::Channel` in shared D3 SRAM. Green onboard LED means the M7 and
+M4 are communicating; red means the worker did not reply.
 
 ## Prerequisites
 
@@ -81,31 +82,14 @@ because Arduino option bytes normally hold M4 until the M7 releases it.
 For later M7-only changes, `cargo run --release -p giga-m7` uses Cargo Embed via
 `.cargo/config.toml`. Reflash M4 whenever `m4` changes.
 
-## Web dashboard layout
-
-Put frontend source in `web/src/` and production assets in `web/dist/`. The M7
-firmware should serve built dashboard assets and expose device controls under
-`/api/*` when the application adds Wi-Fi/network and HTTP support.
-
-Recommended firmware contract:
-
-- static dashboard files: `GET /`, `GET /assets/*`, or equivalent;
-- status/control API: `/api/*` JSON or binary endpoints chosen by the app;
-- M7 owns networking, HTTP routing, and board peripherals;
-- M4 owns deterministic worker tasks and communicates with M7 through typed IPC
-  or a larger `giga_r1::ipc::SharedQueue` region for bulk data.
-
-This template intentionally does not choose a JavaScript framework, allocator,
-network stack, or HTTP server. Add those at the application layer.
-
 ## Start building
 
-- Put board initialization, Wi-Fi/network policy, audio/control peripherals, and
-  dashboard/API serving in `m7/src/main.rs`.
+- Put board initialization, peripheral setup, and application orchestration in
+  `m7/src/main.rs`.
 - Put deterministic compute, DSP, or real-time worker code in `m4/src/main.rs`.
-- Keep typed IPC state in `.ipc_mailbox` and use `giga_r1::ipc::IpcMailbox` /
-  `Channel`; ordinary statics are not automatically shared safely across the
-  cache boundary.
+- Keep typed IPC state in `.ipc_mailbox` and use
+  `giga_r1::ipc::IpcMailbox` / `Channel`; ordinary statics are not
+  automatically shared safely across the cache boundary.
 - For bulk binary traffic, use `giga_r1::ipc::SharedQueue` in an explicit larger
   D3 SRAM linker region; do not enlarge the postcard RPC mailbox.
 

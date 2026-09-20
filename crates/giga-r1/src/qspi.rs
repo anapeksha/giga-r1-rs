@@ -5,8 +5,13 @@
 //!
 //! [`OnboardQspiFlash`] is an optional Embassy-backed convenience wrapper
 //! implementing [`embedded_storage_async::nor_flash::ReadNorFlash`] and
-//! [`embedded_storage_async::nor_flash::NorFlash`] for generic storage crates
-//! such as `sequential-storage`.
+//! [`embedded_storage_async::nor_flash::NorFlash`] for async generic storage
+//! crates such as `sequential-storage`.
+//!
+//! [`BlockingOnboardQspiFlash`] uses the same board routing and low-level NOR
+//! commands, but implements [`embedded_storage::nor_flash::ReadNorFlash`] and
+//! [`embedded_storage::nor_flash::NorFlash`] for bootloaders or other blocking
+//! storage users that must not depend on an executor.
 //!
 //! ```ignore
 //! use giga_r1::qspi::OnboardQspiFlash;
@@ -16,11 +21,23 @@
 //! )
 //! .await?;
 //! let app_storage = 0..(256 * 1024);
-//! // Pass `&mut flash` and `app_storage` to sequential-storage map APIs.
+//! // Pass `&mut flash` and `app_storage` to async storage APIs.
+//! ```
+//!
+//! ```ignore
+//! use giga_r1::qspi::BlockingOnboardQspiFlash;
+//!
+//! let mut flash = BlockingOnboardQspiFlash::new(
+//!     p.QUADSPI, p.PD11, p.PD12, p.PE2, p.PF6, p.PF10, p.PG6,
+//! )?;
+//! // Pass `&mut flash` to blocking `embedded-storage` NOR-flash users.
 //! ```
 //!
 //! Applications are responsible for choosing safe storage ranges and for any
-//! higher-level schema, wear-leveling policy, or database format.
+//! higher-level bootloader, partitioning, wear-leveling, schema, database, or OTA
+//! policy.
+
+use core::hint::spin_loop;
 
 use crate::pins::{PinId, Port};
 use embassy_stm32::{
@@ -36,9 +53,8 @@ use embassy_stm32::{
         },
     },
 };
-use embedded_storage_async::nor_flash::{
-    ErrorType, NorFlash, NorFlashError, NorFlashErrorKind, ReadNorFlash,
-};
+use embedded_storage::nor_flash as blocking_nor;
+use embedded_storage_async::nor_flash as async_nor;
 
 /// Total capacity of the onboard QSPI NOR flash: 16 MiB.
 pub const FLASH_SIZE: usize = 16 * 1024 * 1024;
@@ -92,21 +108,30 @@ pub struct QspiFlashConfig {
 
 impl Default for QspiFlashConfig {
     fn default() -> Self {
-        #[allow(clippy::field_reassign_with_default)]
-        let mut peripheral = Config::default();
-        peripheral.memory_size = MemorySize::_16MiB;
-        peripheral.address_size = AddressSize::_24bit;
-        peripheral.prescaler = 16;
-        peripheral.fifo_threshold = FIFOThresholdLevel::_4Bytes;
-        peripheral.cs_high_time = ChipSelectHighTime::_5Cycle;
-        peripheral.sample_shifting = SampleShifting::HalfCycle;
-        peripheral.gpio_speed = Speed::VeryHigh;
-        peripheral.dual_flash = false;
-
         Self {
             ready_poll_interval: embassy_time::Duration::from_millis(1),
             ready_poll_attempts: 10_000,
-            peripheral,
+            peripheral: default_qspi_config(),
+        }
+    }
+}
+
+/// Configuration for [`BlockingOnboardQspiFlash`].
+#[derive(Clone, Copy)]
+pub struct BlockingQspiFlashConfig {
+    /// Maximum number of status-register polls before returning
+    /// [`QspiFlashError::BusyTimeout`]. Blocking polling performs a CPU spin
+    /// between attempts and does not require an async timer or executor.
+    pub ready_poll_attempts: usize,
+    /// Embassy QUADSPI peripheral configuration.
+    pub peripheral: Config,
+}
+
+impl Default for BlockingQspiFlashConfig {
+    fn default() -> Self {
+        Self {
+            ready_poll_attempts: 10_000,
+            peripheral: default_qspi_config(),
         }
     }
 }
@@ -123,17 +148,17 @@ pub enum QspiFlashError {
     BusyTimeout,
 }
 
-impl NorFlashError for QspiFlashError {
-    fn kind(&self) -> NorFlashErrorKind {
+impl blocking_nor::NorFlashError for QspiFlashError {
+    fn kind(&self) -> blocking_nor::NorFlashErrorKind {
         match self {
-            Self::OutOfBounds => NorFlashErrorKind::OutOfBounds,
-            Self::Unaligned => NorFlashErrorKind::NotAligned,
-            Self::BusyTimeout => NorFlashErrorKind::Other,
+            Self::OutOfBounds => blocking_nor::NorFlashErrorKind::OutOfBounds,
+            Self::Unaligned => blocking_nor::NorFlashErrorKind::NotAligned,
+            Self::BusyTimeout => blocking_nor::NorFlashErrorKind::Other,
         }
     }
 }
 
-/// Embassy-backed wrapper for the Arduino GIGA R1 onboard QSPI NOR flash.
+/// Embassy-backed async wrapper for the Arduino GIGA R1 onboard QSPI NOR flash.
 ///
 /// This type uses standard SPI NOR commands over the STM32H747 QUADSPI bank-1
 /// routing described by [`FLASH`]. Reads use command `0x03`, writes are split on
@@ -142,7 +167,7 @@ impl NorFlashError for QspiFlashError {
 /// QSPI transfers are currently blocking.
 ///
 /// The wrapper intentionally does not reserve ranges or impose a database,
-/// filesystem, DHCP, or application storage policy.
+/// filesystem, DHCP, bootloader, OTA, or application storage policy.
 pub struct OnboardQspiFlash<'d, T: Instance> {
     qspi: Qspi<'d, T, Blocking>,
     config: QspiFlashConfig,
@@ -211,83 +236,135 @@ where
     /// Read the three-byte JEDEC identifier with command `0x9f`.
     pub async fn read_jedec_id(&mut self) -> Result<[u8; 3], QspiFlashError> {
         self.wait_ready().await?;
-        let mut id = [0_u8; 3];
-        self.qspi.blocking_read(
-            &mut id,
-            TransferConfig {
-                iwidth: QspiWidth::SING,
-                dwidth: QspiWidth::SING,
-                instruction: JEDEC_ID,
-                ..Default::default()
-            },
-        );
-        Ok(id)
+        Ok(read_jedec_id(&mut self.qspi))
     }
 
     async fn write_enable(&mut self) -> Result<(), QspiFlashError> {
         self.wait_ready().await?;
-        self.qspi.blocking_command(TransferConfig {
-            iwidth: QspiWidth::SING,
-            instruction: WRITE_ENABLE,
-            ..Default::default()
-        });
+        write_enable(&mut self.qspi);
         Ok(())
     }
 
     async fn wait_ready(&mut self) -> Result<(), QspiFlashError> {
         for _ in 0..self.config.ready_poll_attempts {
-            let mut status = [0_u8; 1];
-            self.qspi.blocking_read(
-                &mut status,
-                TransferConfig {
-                    iwidth: QspiWidth::SING,
-                    dwidth: QspiWidth::SING,
-                    instruction: READ_STATUS,
-                    ..Default::default()
-                },
-            );
-            if status[0] & STATUS_BUSY == 0 {
+            if read_status(&mut self.qspi) & STATUS_BUSY == 0 {
                 return Ok(());
             }
             embassy_time::Timer::after(self.config.ready_poll_interval).await;
         }
         Err(QspiFlashError::BusyTimeout)
     }
+}
 
-    fn validate_range(offset: u32, length: usize) -> Result<(), QspiFlashError> {
-        let offset = offset as usize;
-        if length > FLASH_SIZE || offset > FLASH_SIZE - length {
-            Err(QspiFlashError::OutOfBounds)
-        } else {
-            Ok(())
+/// Blocking wrapper for the Arduino GIGA R1 onboard QSPI NOR flash.
+///
+/// This type uses the same QUADSPI bank-1 routing, flash geometry, command set,
+/// range validation, 4 KiB erase granularity, and 256-byte page-program splitting
+/// as [`OnboardQspiFlash`], but exposes blocking `embedded-storage` traits for
+/// bootloaders or other synchronous users. Busy polling spins locally and does
+/// not require Embassy time, an executor, or an application timer.
+///
+/// The BSP still does not define partitions, firmware slots, update policy, or
+/// image validation. Those remain application or bootloader responsibilities.
+pub struct BlockingOnboardQspiFlash<'d, T: Instance> {
+    qspi: Qspi<'d, T, Blocking>,
+    config: BlockingQspiFlashConfig,
+}
+
+impl<'d, T> BlockingOnboardQspiFlash<'d, T>
+where
+    T: Instance,
+{
+    /// Construct the onboard bank-1 flash with
+    /// [`BlockingQspiFlashConfig::default`].
+    pub fn new(
+        peri: Peri<'d, T>,
+        io0: Peri<'d, impl BK1D0Pin<T>>,
+        io1: Peri<'d, impl BK1D1Pin<T>>,
+        io2: Peri<'d, impl BK1D2Pin<T>>,
+        io3: Peri<'d, impl BK1D3Pin<T>>,
+        clock: Peri<'d, impl SckPin<T>>,
+        chip_select: Peri<'d, impl BK1NSSPin<T>>,
+    ) -> Result<Self, QspiFlashError> {
+        Self::new_with_config(
+            peri,
+            io0,
+            io1,
+            io2,
+            io3,
+            clock,
+            chip_select,
+            BlockingQspiFlashConfig::default(),
+        )
+    }
+
+    /// Construct the onboard bank-1 flash with custom blocking/QSPI settings.
+    #[allow(clippy::too_many_arguments)]
+    pub fn new_with_config(
+        peri: Peri<'d, T>,
+        io0: Peri<'d, impl BK1D0Pin<T>>,
+        io1: Peri<'d, impl BK1D1Pin<T>>,
+        io2: Peri<'d, impl BK1D2Pin<T>>,
+        io3: Peri<'d, impl BK1D3Pin<T>>,
+        clock: Peri<'d, impl SckPin<T>>,
+        chip_select: Peri<'d, impl BK1NSSPin<T>>,
+        config: BlockingQspiFlashConfig,
+    ) -> Result<Self, QspiFlashError> {
+        let qspi = Qspi::new_blocking_bank1(
+            peri,
+            io0,
+            io1,
+            io2,
+            io3,
+            clock,
+            chip_select,
+            config.peripheral,
+        );
+        let mut flash = Self { qspi, config };
+        flash.wait_ready()?;
+        Ok(flash)
+    }
+
+    /// Return ownership of the underlying Embassy QSPI peripheral wrapper.
+    #[must_use]
+    pub fn release(self) -> Qspi<'d, T, Blocking> {
+        self.qspi
+    }
+
+    /// Read the three-byte JEDEC identifier with command `0x9f`.
+    pub fn read_jedec_id(&mut self) -> Result<[u8; 3], QspiFlashError> {
+        self.wait_ready()?;
+        Ok(read_jedec_id(&mut self.qspi))
+    }
+
+    fn write_enable(&mut self) -> Result<(), QspiFlashError> {
+        self.wait_ready()?;
+        write_enable(&mut self.qspi);
+        Ok(())
+    }
+
+    fn wait_ready(&mut self) -> Result<(), QspiFlashError> {
+        for _ in 0..self.config.ready_poll_attempts {
+            if read_status(&mut self.qspi) & STATUS_BUSY == 0 {
+                return Ok(());
+            }
+            spin_loop();
         }
+        Err(QspiFlashError::BusyTimeout)
     }
 }
 
-impl<T: Instance> ErrorType for OnboardQspiFlash<'_, T> {
+impl<T: Instance> async_nor::ErrorType for OnboardQspiFlash<'_, T> {
     type Error = QspiFlashError;
 }
 
-impl<T: Instance> ReadNorFlash for OnboardQspiFlash<'_, T> {
+impl<T: Instance> async_nor::ReadNorFlash for OnboardQspiFlash<'_, T> {
     const READ_SIZE: usize = 1;
 
     async fn read(&mut self, offset: u32, bytes: &mut [u8]) -> Result<(), Self::Error> {
-        Self::validate_range(offset, bytes.len())?;
+        validate_range(offset, bytes.len())?;
         self.wait_ready().await?;
-        if bytes.is_empty() {
-            return Ok(());
-        }
-        self.qspi.blocking_read(
-            bytes,
-            TransferConfig {
-                iwidth: QspiWidth::SING,
-                awidth: QspiWidth::SING,
-                dwidth: QspiWidth::SING,
-                instruction: READ,
-                address: Some(offset),
-                ..Default::default()
-            },
-        );
+        read_at(&mut self.qspi, offset, bytes);
         Ok(())
     }
 
@@ -296,31 +373,17 @@ impl<T: Instance> ReadNorFlash for OnboardQspiFlash<'_, T> {
     }
 }
 
-impl<T: Instance> NorFlash for OnboardQspiFlash<'_, T> {
+impl<T: Instance> async_nor::NorFlash for OnboardQspiFlash<'_, T> {
     const WRITE_SIZE: usize = 1;
     const ERASE_SIZE: usize = SECTOR_SIZE;
 
     async fn erase(&mut self, from: u32, to: u32) -> Result<(), Self::Error> {
-        if from > to {
-            return Err(QspiFlashError::OutOfBounds);
-        }
-        Self::validate_range(from, (to - from) as usize)?;
-        if !(from as usize).is_multiple_of(SECTOR_SIZE)
-            || !(to as usize).is_multiple_of(SECTOR_SIZE)
-        {
-            return Err(QspiFlashError::Unaligned);
-        }
+        validate_erase_range(from, to)?;
 
         let mut address = from;
         while address < to {
             self.write_enable().await?;
-            self.qspi.blocking_command(TransferConfig {
-                iwidth: QspiWidth::SING,
-                awidth: QspiWidth::SING,
-                instruction: SECTOR_ERASE,
-                address: Some(address),
-                ..Default::default()
-            });
+            erase_sector(&mut self.qspi, address);
             self.wait_ready().await?;
             address += SECTOR_SIZE as u32;
         }
@@ -328,7 +391,7 @@ impl<T: Instance> NorFlash for OnboardQspiFlash<'_, T> {
     }
 
     async fn write(&mut self, offset: u32, bytes: &[u8]) -> Result<(), Self::Error> {
-        Self::validate_range(offset, bytes.len())?;
+        validate_range(offset, bytes.len())?;
         let mut address = offset;
         let mut remaining = bytes;
 
@@ -338,17 +401,7 @@ impl<T: Instance> NorFlash for OnboardQspiFlash<'_, T> {
             let (chunk, rest) = remaining.split_at(chunk_len);
 
             self.write_enable().await?;
-            self.qspi.blocking_write(
-                chunk,
-                TransferConfig {
-                    iwidth: QspiWidth::SING,
-                    awidth: QspiWidth::SING,
-                    dwidth: QspiWidth::SING,
-                    instruction: PAGE_PROGRAM,
-                    address: Some(address),
-                    ..Default::default()
-                },
-            );
+            program_page(&mut self.qspi, address, chunk);
             self.wait_ready().await?;
 
             address += chunk_len as u32;
@@ -356,4 +409,172 @@ impl<T: Instance> NorFlash for OnboardQspiFlash<'_, T> {
         }
         Ok(())
     }
+}
+
+impl<T: Instance> blocking_nor::ErrorType for BlockingOnboardQspiFlash<'_, T> {
+    type Error = QspiFlashError;
+}
+
+impl<T: Instance> blocking_nor::ReadNorFlash for BlockingOnboardQspiFlash<'_, T> {
+    const READ_SIZE: usize = 1;
+
+    fn read(&mut self, offset: u32, bytes: &mut [u8]) -> Result<(), Self::Error> {
+        validate_range(offset, bytes.len())?;
+        self.wait_ready()?;
+        read_at(&mut self.qspi, offset, bytes);
+        Ok(())
+    }
+
+    fn capacity(&self) -> usize {
+        FLASH_SIZE
+    }
+}
+
+impl<T: Instance> blocking_nor::NorFlash for BlockingOnboardQspiFlash<'_, T> {
+    const WRITE_SIZE: usize = 1;
+    const ERASE_SIZE: usize = SECTOR_SIZE;
+
+    fn erase(&mut self, from: u32, to: u32) -> Result<(), Self::Error> {
+        validate_erase_range(from, to)?;
+
+        let mut address = from;
+        while address < to {
+            self.write_enable()?;
+            erase_sector(&mut self.qspi, address);
+            self.wait_ready()?;
+            address += SECTOR_SIZE as u32;
+        }
+        Ok(())
+    }
+
+    fn write(&mut self, offset: u32, bytes: &[u8]) -> Result<(), Self::Error> {
+        validate_range(offset, bytes.len())?;
+        let mut address = offset;
+        let mut remaining = bytes;
+
+        while !remaining.is_empty() {
+            let page_remaining = PAGE_SIZE - (address as usize % PAGE_SIZE);
+            let chunk_len = remaining.len().min(page_remaining);
+            let (chunk, rest) = remaining.split_at(chunk_len);
+
+            self.write_enable()?;
+            program_page(&mut self.qspi, address, chunk);
+            self.wait_ready()?;
+
+            address += chunk_len as u32;
+            remaining = rest;
+        }
+        Ok(())
+    }
+}
+
+fn default_qspi_config() -> Config {
+    #[allow(clippy::field_reassign_with_default)]
+    let mut peripheral = Config::default();
+    peripheral.memory_size = MemorySize::_16MiB;
+    peripheral.address_size = AddressSize::_24bit;
+    peripheral.prescaler = 16;
+    peripheral.fifo_threshold = FIFOThresholdLevel::_4Bytes;
+    peripheral.cs_high_time = ChipSelectHighTime::_5Cycle;
+    peripheral.sample_shifting = SampleShifting::HalfCycle;
+    peripheral.gpio_speed = Speed::VeryHigh;
+    peripheral.dual_flash = false;
+    peripheral
+}
+
+fn validate_range(offset: u32, length: usize) -> Result<(), QspiFlashError> {
+    let offset = offset as usize;
+    if length > FLASH_SIZE || offset > FLASH_SIZE - length {
+        Err(QspiFlashError::OutOfBounds)
+    } else {
+        Ok(())
+    }
+}
+
+fn validate_erase_range(from: u32, to: u32) -> Result<(), QspiFlashError> {
+    if from > to {
+        return Err(QspiFlashError::OutOfBounds);
+    }
+    validate_range(from, (to - from) as usize)?;
+    if !(from as usize).is_multiple_of(SECTOR_SIZE) || !(to as usize).is_multiple_of(SECTOR_SIZE) {
+        return Err(QspiFlashError::Unaligned);
+    }
+    Ok(())
+}
+
+fn read_status<T: Instance>(qspi: &mut Qspi<'_, T, Blocking>) -> u8 {
+    let mut status = [0_u8; 1];
+    qspi.blocking_read(
+        &mut status,
+        TransferConfig {
+            iwidth: QspiWidth::SING,
+            dwidth: QspiWidth::SING,
+            instruction: READ_STATUS,
+            ..Default::default()
+        },
+    );
+    status[0]
+}
+
+fn write_enable<T: Instance>(qspi: &mut Qspi<'_, T, Blocking>) {
+    qspi.blocking_command(TransferConfig {
+        iwidth: QspiWidth::SING,
+        instruction: WRITE_ENABLE,
+        ..Default::default()
+    });
+}
+
+fn read_jedec_id<T: Instance>(qspi: &mut Qspi<'_, T, Blocking>) -> [u8; 3] {
+    let mut id = [0_u8; 3];
+    qspi.blocking_read(
+        &mut id,
+        TransferConfig {
+            iwidth: QspiWidth::SING,
+            dwidth: QspiWidth::SING,
+            instruction: JEDEC_ID,
+            ..Default::default()
+        },
+    );
+    id
+}
+
+fn read_at<T: Instance>(qspi: &mut Qspi<'_, T, Blocking>, offset: u32, bytes: &mut [u8]) {
+    if bytes.is_empty() {
+        return;
+    }
+    qspi.blocking_read(
+        bytes,
+        TransferConfig {
+            iwidth: QspiWidth::SING,
+            awidth: QspiWidth::SING,
+            dwidth: QspiWidth::SING,
+            instruction: READ,
+            address: Some(offset),
+            ..Default::default()
+        },
+    );
+}
+
+fn erase_sector<T: Instance>(qspi: &mut Qspi<'_, T, Blocking>, address: u32) {
+    qspi.blocking_command(TransferConfig {
+        iwidth: QspiWidth::SING,
+        awidth: QspiWidth::SING,
+        instruction: SECTOR_ERASE,
+        address: Some(address),
+        ..Default::default()
+    });
+}
+
+fn program_page<T: Instance>(qspi: &mut Qspi<'_, T, Blocking>, address: u32, bytes: &[u8]) {
+    qspi.blocking_write(
+        bytes,
+        TransferConfig {
+            iwidth: QspiWidth::SING,
+            awidth: QspiWidth::SING,
+            dwidth: QspiWidth::SING,
+            instruction: PAGE_PROGRAM,
+            address: Some(address),
+            ..Default::default()
+        },
+    );
 }

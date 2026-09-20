@@ -129,10 +129,12 @@ sequence.
 ## Onboard QSPI flash
 
 With the `qspi` feature, `giga-r1` exposes both the bank-1 routing metadata and
-an Embassy-backed NOR flash wrapper for the onboard 16 MiB QSPI flash. The
-wrapper implements `embedded-storage-async` `ReadNorFlash` and `NorFlash`, uses
-4 KiB sector erase and 256-byte page program operations, and leaves storage
-ranges and data formats to the application:
+NOR flash wrappers for the onboard 16 MiB QSPI flash. The async
+`OnboardQspiFlash` implements `embedded-storage-async` `ReadNorFlash` and
+`NorFlash`; the blocking `BlockingOnboardQspiFlash` implements the matching
+blocking `embedded-storage` traits for bootloaders or synchronous storage users.
+Both wrappers use 4 KiB physical sector erase and 256-byte page program
+operations, and leave storage ranges and data formats to the application:
 
 ```rust,ignore
 let mut flash = giga_r1::qspi::OnboardQspiFlash::new(
@@ -140,11 +142,21 @@ let mut flash = giga_r1::qspi::OnboardQspiFlash::new(
 )
 .await?;
 let jedec = flash.read_jedec_id().await?;
+
+// Or construct the blocking wrapper instead when an executor-free storage
+// interface is needed:
+let mut flash = giga_r1::qspi::BlockingOnboardQspiFlash::new(
+    p.QUADSPI, p.PD11, p.PD12, p.PE2, p.PF6, p.PF10, p.PG6,
+)?;
+embedded_storage::nor_flash::NorFlash::erase(&mut flash, 0, 4096)?;
 ```
 
-Use this with generic storage crates such as `sequential-storage` by passing a
-chosen application range and `&mut flash`; the BSP does not reserve persistence
-regions or impose a database policy.
+Use these wrappers with generic storage crates by passing a chosen application
+range and `&mut flash`; the BSP does not reserve persistence regions or impose a
+database, bootloader, OTA, partitioning, or signing policy. The
+[`examples/m7_qspi_blocking_storage`](examples/m7_qspi_blocking_storage) example
+shows blocking erase/write/read verification on a clearly marked destructive test
+sector.
 
 Wi-Fi initialization owns the GIGA power sequence, CYW4343W firmware, NVRAM,
 and country data. Because the CYW43 runner consumes itself and must be polled

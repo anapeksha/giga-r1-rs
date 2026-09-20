@@ -20,6 +20,7 @@ members = [
     "examples/m7_fdcan_loopback",
     "examples/m7_gpio_loopback",
     "examples/m7_pwm_loopback",
+    "examples/m7_qspi_blocking_storage",
     "examples/m7_qspi_jedec",
     "examples/m7_rgb_blinky",
     "examples/m7_spi_loopback",
@@ -65,6 +66,7 @@ embedded-hal = "1.0.0"
 embedded-hal-async = "1.0.0"
 embedded-hal-nb = "1.0.0"
 embedded-io-async = "0.7.0"
+embedded-storage = "0.3.1"
 embedded-storage-async = "0.4.1"
 nb = "1.1.0"
 panic-halt = "1.0.0"

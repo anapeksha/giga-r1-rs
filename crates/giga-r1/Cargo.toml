@@ -21,6 +21,7 @@ defmt = { workspace = true, optional = true }
 embedded-hal.workspace = true
 embedded-hal-async = { workspace = true, optional = true }
 embedded-io-async = { workspace = true, optional = true }
+embedded-storage = { workspace = true, optional = true }
 embedded-storage-async = { workspace = true, optional = true }
 embassy-stm32 = { workspace = true, optional = true }
 embassy-time = { workspace = true, optional = true }
@@ -48,6 +49,7 @@ ipc = [
 qspi = [
     "dep:embassy-stm32",
     "dep:embassy-time",
+    "dep:embedded-storage",
     "dep:embedded-storage-async",
     "embassy-stm32/stm32h747xi-cm7",
     "embassy-stm32/time",
